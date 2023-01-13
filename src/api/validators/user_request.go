@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"regexp"
 	"strings"
 
 	"github.com/online.scheduling-api/src/business/models"
@@ -10,11 +11,11 @@ import (
 func Validate(u *models.User) error {
 	var errMsg []string
 
-	if strings.Trim(u.Name, " ") == "" {
+	if u.Name == "" {
 		errMsg = append(errMsg, "Informe um nome válido")
 	}
 
-	if strings.Trim(u.Phone, " ") == "" {
+	if !regexp.MustCompile(`^[\d]{11}$`).MatchString(u.Phone) {
 		errMsg = append(errMsg, "Informe um celular válido")
 	}
 

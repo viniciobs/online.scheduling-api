@@ -50,6 +50,8 @@ func Create(c *gin.Context) {
 		return
 	}
 
+	user.RemoveWhiteSpaces()
+
 	if err := validator.Validate(&user); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, err)
 		return
