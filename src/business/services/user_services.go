@@ -6,35 +6,39 @@ import (
 	"github.com/online.scheduling-api/src/infra/repository"
 )
 
-func GetAllUsers() (*[]models.User, error) {
-	return repository.GetAllUsers()
+type IUserServices interface {
+	GetAllUsers() ([]*models.User, error)
+	GetUserById(uuid *uuid.UUID) (*models.User, error)
+	CreateNewUser(u *models.User) (isDuplicated bool, err error)
+	UpdateUser(u *models.User) (isFound bool, err error)
+	DeleteUserById(uuid *uuid.UUID) (found bool, err error)
 }
 
-func GetUserById(uuid *uuid.UUID) (*models.User, error) {
-	return repository.GetUserById(uuid)
+type UserServices struct {
+	UserRepository repository.IUserRepository
 }
 
-func CreateNewUser(u *models.User) (isDuplicated bool, err error) {
-	isDuplicated, err = repository.ExistsByPhone(u.Phone)
+func (us *UserServices) GetAllUsers() ([]*models.User, error) {
+	return us.UserRepository.GetAllUsers()
+}
+
+func (us *UserServices) GetUserById(uuid *uuid.UUID) (*models.User, error) {
+	return us.UserRepository.GetUserById(uuid)
+}
+
+func (us *UserServices) CreateNewUser(u *models.User) (isDuplicated bool, err error) {
+	isDuplicated, err = us.UserRepository.ExistsByPhone(u.Phone)
 	if err != nil || isDuplicated {
 		return isDuplicated, err
 	}
 
-	return false, repository.CreateNewUser(u)
+	return false, us.UserRepository.CreateNewUser(u)
 }
 
-func UpdateUser(u *models.User) error {
-	return repository.UpdateUser(u)
+func (us *UserServices) UpdateUser(u *models.User) (isFound bool, err error) {
+	return us.UserRepository.UpdateUser(u)
 }
 
-func DeleteUserById(uuid *uuid.UUID) (found bool, err error) {
-	user, err := repository.GetUserById(uuid)
-	if err != nil {
-		return false, err
-	}
-	if user == nil {
-		return false, nil
-	}
-
-	return true, repository.DeleteUserById(uuid)
+func (us *UserServices) DeleteUserById(uuid *uuid.UUID) (isFound bool, err error) {
+	return us.UserRepository.DeleteUserById(uuid)
 }
