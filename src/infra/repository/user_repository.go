@@ -41,15 +41,15 @@ func (ur *UserRepository) GetAllUsers() ([]*models.User, error) {
 }
 
 func (ur *UserRepository) GetUserById(uuid *uuid.UUID) (*models.User, error) {
-	// var user *models.User
-	// // err := ur.collection().FindId(uuid).One(&user)
+	var user *models.User
+	filter := bson.D{{Name: "id", Value: uuid}}
 
-	// if err == mgo.ErrNotFound {
-	// 	return nil, nil
-	// }
+	err := ur.collection().FindOne(context.TODO(), filter).Decode(&user)
+	if err == mongo.ErrNoDocuments {
+		return nil, nil
+	}
 
-	// return user, err
-	return nil, nil
+	return user, err
 }
 
 func (ur *UserRepository) CreateNewUser(u *models.User) error {
@@ -90,7 +90,14 @@ func (ur *UserRepository) DeleteUserById(uuid *uuid.UUID) (isFound bool, err err
 }
 
 func (ur *UserRepository) ExistsByPhone(phone string) (bool, error) {
-	return false, nil
+	filter := bson.D{{Name: "phone", Value: phone}}
+
+	result := ur.collection().FindOne(context.TODO(), filter)
+	if result == nil {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func (ur *UserRepository) collection() *mongo.Collection {
