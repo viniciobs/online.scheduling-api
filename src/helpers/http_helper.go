@@ -3,7 +3,7 @@ package helpers
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -13,7 +13,7 @@ import (
 func JSONResponse(w http.ResponseWriter, status int, data interface{}) {
 	resp, _ := json.Marshal(data)
 	w.WriteHeader(status)
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Add("content-type", "application/json")
 	w.Write(resp)
 }
 
@@ -27,13 +27,13 @@ func ReadJSONBody(r *http.Request, data interface{}) error {
 }
 
 func ReadBody(r *http.Request) ([]byte, error) {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, err
 	}
 
 	r.Body.Close()
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	r.Body = io.NopCloser(bytes.NewBuffer(body))
 
 	return body, nil
 }
