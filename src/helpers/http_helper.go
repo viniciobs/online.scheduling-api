@@ -12,8 +12,8 @@ import (
 
 func JSONResponse(w http.ResponseWriter, status int, data interface{}) {
 	resp, _ := json.Marshal(data)
+	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(status)
-	w.Header().Add("content-type", "application/json")
 	w.Write(resp)
 }
 
