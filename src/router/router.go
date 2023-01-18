@@ -19,8 +19,8 @@ func configureUserRoutes(r *mux.Router, ctn di.Container) {
 	handler := ctn.Get("user-handler").(*handlers.UsersHandler)
 
 	r.HandleFunc("/api/users", handler.GetAll).Methods("GET")
-	r.HandleFunc("/api/users/:id", handler.GetById).Methods("GET")
+	r.HandleFunc("/api/users/{id}", handler.GetById).Methods("GET")
 	r.HandleFunc("/api/users", handler.Create).Methods("POST")
-	r.HandleFunc("/api/users/:id", handler.Update).Methods("PATCH")
-	r.HandleFunc("/api/users/:id", handler.Delete).Methods("DELETE")
+	r.HandleFunc("/api/users/{id}", handler.Update).Methods("PATCH")
+	r.HandleFunc("/api/users/{id}", handler.Delete).Methods("DELETE")
 }
