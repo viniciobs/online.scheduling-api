@@ -5,9 +5,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-
-	"github.com/google/uuid"
-	"github.com/gorilla/mux"
 )
 
 func JSONResponse(w http.ResponseWriter, status int, data interface{}) {
@@ -36,13 +33,4 @@ func ReadBody(r *http.Request) ([]byte, error) {
 	r.Body = io.NopCloser(bytes.NewBuffer(body))
 
 	return body, nil
-}
-
-func GetUUID(r *http.Request) (*uuid.UUID, error) {
-	id, err := uuid.Parse(mux.Vars(r)["Id"])
-	if err != nil {
-		return nil, err
-	}
-
-	return &id, nil
 }

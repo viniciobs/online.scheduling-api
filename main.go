@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -11,6 +11,8 @@ import (
 )
 
 func main() {
+	log.Println("Initializing...")
+
 	builder, _ := di.NewBuilder()
 	builder.Add(ioc.Services...)
 
@@ -25,7 +27,11 @@ func main() {
 		WriteTimeout: 5 * time.Second,
 		ReadTimeout:  3 * time.Second,
 	}
+
+	log.Printf("Serving on %s", srv.Addr)
+
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		fmt.Println(err.Error())
+		log.Print("Shutting down...")
+		log.Fatalln(err.Error())
 	}
 }

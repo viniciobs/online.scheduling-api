@@ -9,11 +9,11 @@ import (
 )
 
 type User struct {
-	Id       uuid.UUID `json:"id"`
-	Name     string    `json:"name"`
-	Phone    string    `json:"phone"`
-	Role     Role      `json:"role"`
-	IsActive bool      `json:"isActive"`
+	Id       uuid.UUID `json:"id" bson:"id"`
+	Name     string    `json:"name" bson:"name"`
+	Phone    string    `json:"phone" bson:"phone"`
+	Role     Role      `json:"role" bson:"role"`
+	IsActive bool      `json:"isActive" bson:"isActive"`
 }
 
 func (u *User) removeWhiteSpaces() {

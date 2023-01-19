@@ -10,7 +10,7 @@ type IUserServices interface {
 	GetAllUsers() ([]*models.User, error)
 	GetUserById(uuid *uuid.UUID) (*models.User, error)
 	CreateNewUser(u *models.User) (isDuplicated bool, err error)
-	UpdateUser(u *models.User) (isFound bool, err error)
+	UpdateUser(uuid *uuid.UUID, u *models.User) (isFound bool, err error)
 	DeleteUserById(uuid *uuid.UUID) (found bool, err error)
 }
 
@@ -35,8 +35,8 @@ func (us *UserServices) CreateNewUser(u *models.User) (isDuplicated bool, err er
 	return false, us.UserRepository.CreateNewUser(u)
 }
 
-func (us *UserServices) UpdateUser(u *models.User) (isFound bool, err error) {
-	return us.UserRepository.UpdateUser(u)
+func (us *UserServices) UpdateUser(uuid *uuid.UUID, u *models.User) (isFound bool, err error) {
+	return us.UserRepository.UpdateUser(uuid, u)
 }
 
 func (us *UserServices) DeleteUserById(uuid *uuid.UUID) (isFound bool, err error) {

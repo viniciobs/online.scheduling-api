@@ -14,7 +14,7 @@ type IUserRepository interface {
 	GetAllUsers() ([]*models.User, error)
 	GetUserById(uuid *uuid.UUID) (*models.User, error)
 	CreateNewUser(u *models.User) error
-	UpdateUser(u *models.User) (isFound bool, err error)
+	UpdateUser(uuid *uuid.UUID, u *models.User) (isFound bool, err error)
 	DeleteUserById(uuid *uuid.UUID) (isFound bool, err error)
 	ExistsByPhone(phone string) (bool, error)
 }
@@ -24,7 +24,8 @@ type UserRepository struct {
 }
 
 func (ur *UserRepository) GetAllUsers() ([]*models.User, error) {
-	var users []*models.User
+	users := []*models.User{}
+
 	cursor, err := ur.collection().Find(context.TODO(), bson.M{})
 	if err != nil {
 		return nil, err
@@ -42,7 +43,8 @@ func (ur *UserRepository) GetAllUsers() ([]*models.User, error) {
 
 func (ur *UserRepository) GetUserById(uuid *uuid.UUID) (*models.User, error) {
 	var user *models.User
-	filter := bson.D{{Name: "id", Value: uuid}}
+
+	filter := &bson.M{"id": uuid}
 
 	err := ur.collection().FindOne(context.TODO(), filter).Decode(&user)
 	if err == mongo.ErrNoDocuments {
@@ -58,8 +60,8 @@ func (ur *UserRepository) CreateNewUser(u *models.User) error {
 	return err
 }
 
-func (ur *UserRepository) UpdateUser(u *models.User) (isFound bool, err error) {
-	// err = ur.collection().UpdateId(u.Id, u)
+func (ur *UserRepository) UpdateUser(uuid *uuid.UUID, u *models.User) (isFound bool, err error) {
+	// err = ur.gocollection().UpdateId(uuid, u)
 
 	// if err == nil {
 	// 	return true, nil
@@ -75,29 +77,31 @@ func (ur *UserRepository) UpdateUser(u *models.User) (isFound bool, err error) {
 }
 
 func (ur *UserRepository) DeleteUserById(uuid *uuid.UUID) (isFound bool, err error) {
-	// err = ur.collection().RemoveId(uuid)
+	filter := &bson.M{"id": uuid}
+	res, err := ur.collection().DeleteOne(context.TODO(), filter)
 
-	// if err == nil {
-	// 	return true, nil
-	// }
+	if err != nil {
+		return false, err
+	}
 
-	// if err == mgo.ErrNotFound {
-	// 	return false, nil
-	// }
-
-	// return false, err
-	return false, nil
-}
-
-func (ur *UserRepository) ExistsByPhone(phone string) (bool, error) {
-	filter := bson.D{{Name: "phone", Value: phone}}
-
-	result := ur.collection().FindOne(context.TODO(), filter)
-	if result == nil {
+	if res.DeletedCount <= 0 {
 		return false, nil
 	}
 
 	return true, nil
+}
+
+func (ur *UserRepository) ExistsByPhone(phone string) (bool, error) {
+	filter := &bson.M{"phone": phone}
+
+	result := ur.collection().FindOne(context.TODO(), filter)
+	err := result.Err()
+
+	if err == mongo.ErrNoDocuments {
+		return false, nil
+	}
+
+	return true, err
 }
 
 func (ur *UserRepository) collection() *mongo.Collection {

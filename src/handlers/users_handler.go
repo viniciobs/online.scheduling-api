@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
+	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"github.com/online.scheduling-api/src/business/models"
 	"github.com/online.scheduling-api/src/business/services"
 	"github.com/online.scheduling-api/src/helpers"
@@ -13,6 +16,8 @@ type UsersHandler struct {
 }
 
 func (uc *UsersHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+	log.Println("Requesting all users")
+
 	users, err := uc.UserService.GetAllUsers()
 
 	if err != nil {
@@ -24,15 +29,17 @@ func (uc *UsersHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uc *UsersHandler) GetById(w http.ResponseWriter, r *http.Request) {
-	id, err := helpers.GetUUID(r)
+	id, err := uuid.Parse(mux.Vars(r)["id"])
 	if err != nil {
-		helpers.JSONResponse(w, http.StatusBadRequest, err)
+		helpers.JSONResponse(w, http.StatusBadRequest, helpers.NewError(err.Error()))
 		return
 	}
 
-	user, err := uc.UserService.GetUserById(id)
+	log.Printf("Requesting user %s", id)
+
+	user, err := uc.UserService.GetUserById(&id)
 	if err != nil {
-		helpers.JSONResponse(w, http.StatusServiceUnavailable, err)
+		helpers.JSONResponse(w, http.StatusServiceUnavailable, helpers.NewError(err.Error()))
 		return
 	}
 	if user == nil {
@@ -52,13 +59,13 @@ func (uc *UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := user.Validate(); err != nil {
-		helpers.JSONResponse(w, http.StatusBadRequest, err)
+		helpers.JSONResponse(w, http.StatusBadRequest, helpers.NewError(err.Error()))
 		return
 	}
 
 	isDuplicated, err := uc.UserService.CreateNewUser(&user)
 	if err != nil {
-		helpers.JSONResponse(w, http.StatusUnprocessableEntity, err)
+		helpers.JSONResponse(w, http.StatusUnprocessableEntity, helpers.NewError(err.Error()))
 		return
 	}
 	if isDuplicated {
@@ -70,22 +77,28 @@ func (uc *UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uc *UsersHandler) Update(w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(mux.Vars(r)["id"])
+	if err != nil {
+		helpers.JSONResponse(w, http.StatusBadRequest, helpers.NewError(err.Error()))
+		return
+	}
+
 	var user models.User
 
 	if err := helpers.ReadJSONBody(r, &user); err != nil {
-		helpers.JSONResponse(w, http.StatusBadRequest, err)
+		helpers.JSONResponse(w, http.StatusBadRequest, helpers.NewError(err.Error()))
 		return
 	}
 
 	if err := user.Validate(); err != nil {
-		helpers.JSONResponse(w, http.StatusBadRequest, err)
+		helpers.JSONResponse(w, http.StatusBadRequest, helpers.NewError(err.Error()))
 		return
 	}
 
-	isFound, err := uc.UserService.UpdateUser(&user)
+	isFound, err := uc.UserService.UpdateUser(&id, &user)
 
 	if err != nil {
-		helpers.JSONResponse(w, http.StatusUnprocessableEntity, err)
+		helpers.JSONResponse(w, http.StatusUnprocessableEntity, helpers.NewError(err.Error()))
 		return
 	}
 
@@ -98,15 +111,15 @@ func (uc *UsersHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uc *UsersHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	id, err := helpers.GetUUID(r)
+	id, err := uuid.Parse(mux.Vars(r)["id"])
 	if err != nil {
-		helpers.JSONResponse(w, http.StatusBadRequest, err)
+		helpers.JSONResponse(w, http.StatusBadRequest, helpers.NewError(err.Error()))
 		return
 	}
 
-	found, err := uc.UserService.DeleteUserById(id)
+	found, err := uc.UserService.DeleteUserById(&id)
 	if err != nil {
-		helpers.JSONResponse(w, http.StatusServiceUnavailable, err)
+		helpers.JSONResponse(w, http.StatusServiceUnavailable, helpers.NewError(err.Error()))
 		return
 	}
 	if !found {
