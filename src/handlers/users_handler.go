@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"log"
+	"errors"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -16,12 +16,10 @@ type UsersHandler struct {
 }
 
 func (uc *UsersHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	log.Println("Requesting all users")
-
 	users, err := uc.UserService.GetAllUsers()
 
 	if err != nil {
-		helpers.JSONResponse(w, http.StatusServiceUnavailable, helpers.NewError(err.Error()))
+		helpers.JSONResponseError(w, http.StatusServiceUnavailable, err)
 		return
 	}
 
@@ -31,19 +29,17 @@ func (uc *UsersHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 func (uc *UsersHandler) GetById(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(mux.Vars(r)["id"])
 	if err != nil {
-		helpers.JSONResponse(w, http.StatusBadRequest, helpers.NewError(err.Error()))
+		helpers.JSONResponseError(w, http.StatusBadRequest, err)
 		return
 	}
-
-	log.Printf("Requesting user %s", id)
 
 	user, err := uc.UserService.GetUserById(&id)
 	if err != nil {
-		helpers.JSONResponse(w, http.StatusServiceUnavailable, helpers.NewError(err.Error()))
+		helpers.JSONResponseError(w, http.StatusServiceUnavailable, err)
 		return
 	}
 	if user == nil {
-		helpers.JSONResponse(w, http.StatusNotFound, &user)
+		helpers.JSONResponseError(w, http.StatusNotFound, nil)
 		return
 	}
 
@@ -54,22 +50,22 @@ func (uc *UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 
 	if err := helpers.ReadJSONBody(r, &user); err != nil {
-		helpers.JSONResponse(w, http.StatusBadRequest, helpers.NewError(err.Error()))
+		helpers.JSONResponseError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := user.Validate(); err != nil {
-		helpers.JSONResponse(w, http.StatusBadRequest, helpers.NewError(err.Error()))
+		helpers.JSONResponseError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	isDuplicated, err := uc.UserService.CreateNewUser(&user)
 	if err != nil {
-		helpers.JSONResponse(w, http.StatusUnprocessableEntity, helpers.NewError(err.Error()))
+		helpers.JSONResponseError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 	if isDuplicated {
-		helpers.JSONResponse(w, http.StatusConflict, helpers.NewError("Usuário já cadastrado"))
+		helpers.JSONResponse(w, http.StatusConflict, errors.New("usuário já cadastrado"))
 		return
 	}
 
@@ -79,31 +75,31 @@ func (uc *UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 func (uc *UsersHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(mux.Vars(r)["id"])
 	if err != nil {
-		helpers.JSONResponse(w, http.StatusBadRequest, helpers.NewError(err.Error()))
+		helpers.JSONResponseError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	var user models.User
 
 	if err := helpers.ReadJSONBody(r, &user); err != nil {
-		helpers.JSONResponse(w, http.StatusBadRequest, helpers.NewError(err.Error()))
+		helpers.JSONResponseError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := user.Validate(); err != nil {
-		helpers.JSONResponse(w, http.StatusBadRequest, helpers.NewError(err.Error()))
+		helpers.JSONResponseError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	isFound, err := uc.UserService.UpdateUser(&id, &user)
 
 	if err != nil {
-		helpers.JSONResponse(w, http.StatusUnprocessableEntity, helpers.NewError(err.Error()))
+		helpers.JSONResponseError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
 	if !isFound {
-		helpers.JSONResponse(w, http.StatusNotFound, helpers.NewError("Usuário não encontrado"))
+		helpers.JSONResponseError(w, http.StatusNotFound, errors.New("usuário não encontrado"))
 		return
 	}
 
@@ -113,17 +109,17 @@ func (uc *UsersHandler) Update(w http.ResponseWriter, r *http.Request) {
 func (uc *UsersHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(mux.Vars(r)["id"])
 	if err != nil {
-		helpers.JSONResponse(w, http.StatusBadRequest, helpers.NewError(err.Error()))
+		helpers.JSONResponseError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	found, err := uc.UserService.DeleteUserById(&id)
 	if err != nil {
-		helpers.JSONResponse(w, http.StatusServiceUnavailable, helpers.NewError(err.Error()))
+		helpers.JSONResponseError(w, http.StatusServiceUnavailable, err)
 		return
 	}
 	if !found {
-		helpers.JSONResponse(w, http.StatusNotFound, nil)
+		helpers.JSONResponseError(w, http.StatusNotFound, nil)
 		return
 	}
 

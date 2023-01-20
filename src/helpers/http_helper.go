@@ -7,11 +7,23 @@ import (
 	"net/http"
 )
 
+func JSONResponseError(w http.ResponseWriter, status int, err error) {
+	var _err any
+	if err != nil {
+		_err = NewError(err.Error())
+	}
+
+	JSONResponse(w, status, _err)
+}
+
 func JSONResponse(w http.ResponseWriter, status int, data interface{}) {
-	resp, _ := json.Marshal(data)
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(status)
-	w.Write(resp)
+
+	if data != nil {
+		resp, _ := json.Marshal(data)
+		w.Write(resp)
+	}
 }
 
 func ReadJSONBody(r *http.Request, data interface{}) error {
