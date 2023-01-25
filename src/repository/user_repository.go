@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/online.scheduling-api/config"
-	"github.com/online.scheduling-api/src/business/models"
+	"github.com/online.scheduling-api/src/models"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gopkg.in/mgo.v2/bson"
 )

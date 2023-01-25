@@ -2,8 +2,8 @@ package services
 
 import (
 	"github.com/google/uuid"
-	"github.com/online.scheduling-api/src/business/models"
-	"github.com/online.scheduling-api/src/infra/repository"
+	"github.com/online.scheduling-api/src/models"
+	"github.com/online.scheduling-api/src/repository"
 )
 
 type IUserServices interface {

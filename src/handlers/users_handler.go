@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"github.com/online.scheduling-api/src/business/models"
-	"github.com/online.scheduling-api/src/business/services"
 	"github.com/online.scheduling-api/src/helpers"
+	"github.com/online.scheduling-api/src/models"
+	"github.com/online.scheduling-api/src/services"
 )
 
 type UsersHandler struct {

@@ -5,8 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/online.scheduling-api/src/ioc"
-	"github.com/online.scheduling-api/src/router"
+	"github.com/online.scheduling-api/ioc"
 	"github.com/sarulabs/di"
 )
 
@@ -19,7 +18,7 @@ func main() {
 	app := builder.Build()
 	defer app.Delete()
 
-	router := router.ConfigureRouter(app)
+	router := ConfigureRouter(app)
 
 	srv := &http.Server{
 		Handler:      router,

@@ -12,10 +12,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
 	"github.com/online.scheduling-api/config"
-	"github.com/online.scheduling-api/src/business/services"
 	"github.com/online.scheduling-api/src/handlers"
 	"github.com/online.scheduling-api/src/helpers"
-	"github.com/online.scheduling-api/src/infra/repository"
+	"github.com/online.scheduling-api/src/repository"
+	"github.com/online.scheduling-api/src/services"
 )
 
 var Services = []di.Def{
