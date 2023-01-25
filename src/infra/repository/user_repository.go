@@ -14,7 +14,7 @@ type IUserRepository interface {
 	GetAllUsers() ([]*models.User, error)
 	GetUserById(uuid *uuid.UUID) (*models.User, error)
 	CreateNewUser(u *models.User) error
-	UpdateUser(uuid *uuid.UUID, u *models.User) (isFound bool, err error)
+	ActivateUser(uuid *uuid.UUID) error
 	DeleteUserById(uuid *uuid.UUID) (isFound bool, err error)
 	ExistsByPhone(phone string) (bool, error)
 }
@@ -63,20 +63,21 @@ func (ur *UserRepository) CreateNewUser(u *models.User) error {
 	return err
 }
 
-func (ur *UserRepository) UpdateUser(uuid *uuid.UUID, u *models.User) (isFound bool, err error) {
-	// err = ur.gocollection().UpdateId(uuid, u)
+func (ur *UserRepository) ActivateUser(uuid *uuid.UUID) error {
+	filter := bson.M{"id": uuid}
+	update := bson.M{
+		"$set": bson.M{
+			"isActive": true,
+		},
+	}
 
-	// if err == nil {
-	// 	return true, nil
-	// }
+	res, err := ur.collection().UpdateOne(context.TODO(), filter, update)
 
-	// if err == mgo.ErrNotFound {
-	// 	return false, nil
-	// }
+	if res.MatchedCount == 0 {
+		return mongo.ErrNoDocuments
+	}
 
-	// return false, mgo.ErrCursor
-
-	return false, nil
+	return err
 }
 
 func (ur *UserRepository) DeleteUserById(uuid *uuid.UUID) (isFound bool, err error) {

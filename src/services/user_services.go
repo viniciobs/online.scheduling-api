@@ -12,7 +12,7 @@ type IUserServices interface {
 	GetAllUsers() ([]*models.User, shared.Code)
 	GetUserById(uuid *uuid.UUID) (*models.User, shared.Code)
 	CreateNewUser(u *models.User) shared.Code
-	UpdateUser(uuid *uuid.UUID, u *models.User) (isFound bool, err error)
+	ActivateUser(uuid *uuid.UUID) shared.Code
 	DeleteUserById(uuid *uuid.UUID) shared.Code
 }
 
@@ -61,8 +61,14 @@ func (us *UserServices) CreateNewUser(u *models.User) shared.Code {
 	return shared.Success
 }
 
-func (us *UserServices) UpdateUser(uuid *uuid.UUID, u *models.User) (isFound bool, err error) {
-	return us.UserRepository.UpdateUser(uuid, u)
+func (us *UserServices) ActivateUser(uuid *uuid.UUID) shared.Code {
+	err := us.UserRepository.ActivateUser(uuid)
+
+	if err != nil {
+		return infraService.MapErrorFrom(err)
+	}
+
+	return shared.Success
 }
 
 func (us *UserServices) DeleteUserById(uuid *uuid.UUID) shared.Code {

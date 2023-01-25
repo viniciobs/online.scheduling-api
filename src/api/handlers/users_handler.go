@@ -1,7 +1,6 @@
 package api
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -84,34 +83,22 @@ func (uc *UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 	helpers.JSONResponse(w, http.StatusCreated, dto.MapUserResponseFrom(&u))
 }
 
-func (uc *UsersHandler) Update(w http.ResponseWriter, r *http.Request) {
+func (uc *UsersHandler) Activate(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(mux.Vars(r)["id"])
 	if err != nil {
 		helpers.JSONResponseError(w, http.StatusBadRequest, err)
 		return
 	}
 
-	var user models.User
+	responseCode := uc.UserService.ActivateUser(&id)
 
-	if err := helpers.ReadJSONBody(r, &user); err != nil {
-		helpers.JSONResponseError(w, http.StatusBadRequest, err)
+	if responseCode == shared.NonExistentRecord {
+		helpers.JSONResponseError(w, http.StatusNotFound, nil)
 		return
 	}
 
-	// if err := user.Validate(); err != nil {
-	// 	helpers.JSONResponseError(w, http.StatusBadRequest, err)
-	// 	return
-	// }
-
-	isFound, err := uc.UserService.UpdateUser(&id, &user)
-
-	if err != nil {
-		helpers.JSONResponseError(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	if !isFound {
-		helpers.JSONResponseError(w, http.StatusNotFound, errors.New("usuário não encontrado"))
+	if responseCode != shared.Success {
+		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)
 		return
 	}
 
