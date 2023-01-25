@@ -9,7 +9,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
-	models "github.com/online.scheduling-api/src/business/models"
+	models "github.com/online.scheduling-api/src/models"
 )
 
 // MockIUserRepository is a mock of IUserRepository interface.

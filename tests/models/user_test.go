@@ -3,7 +3,7 @@ package test_models
 import (
 	"testing"
 
-	"github.com/online.scheduling-api/src/business/models"
+	"github.com/online.scheduling-api/src/models"
 )
 
 func TestShouldReturnErrorWhenNameIsEmptyString(t *testing.T) {

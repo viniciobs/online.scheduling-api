@@ -6,9 +6,9 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
-	"github.com/online.scheduling-api/src/business/models"
-	"github.com/online.scheduling-api/src/business/services"
-	mock_repository "github.com/online.scheduling-api/tests/infra/repository"
+	"github.com/online.scheduling-api/src/models"
+	"github.com/online.scheduling-api/src/services"
+	mock_repository "github.com/online.scheduling-api/tests/repository"
 )
 
 func TestShouldReturnIsDuplicatedEqualTrueWhenTryingToCreateUserWithPhoneAlreadyRegistered(t *testing.T) {
