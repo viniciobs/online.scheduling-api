@@ -1,4 +1,4 @@
-package handlers
+package api
 
 import (
 	"errors"
@@ -6,9 +6,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	dto "github.com/online.scheduling-api/src/api/dtos"
 	"github.com/online.scheduling-api/src/helpers"
 	"github.com/online.scheduling-api/src/models"
 	"github.com/online.scheduling-api/src/services"
+	"github.com/online.scheduling-api/src/shared"
 )
 
 type UsersHandler struct {
@@ -16,14 +18,20 @@ type UsersHandler struct {
 }
 
 func (uc *UsersHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	users, err := uc.UserService.GetAllUsers()
+	users, responseCode := uc.UserService.GetAllUsers()
 
-	if err != nil {
-		helpers.JSONResponseError(w, http.StatusServiceUnavailable, err)
+	if responseCode != shared.Success {
+		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)
 		return
 	}
 
-	helpers.JSONResponse(w, http.StatusOK, &users)
+	var result []dto.UserCreateResponse
+
+	for i := range users {
+		result = append(result, dto.MapUserResponseFrom(users[i]))
+	}
+
+	helpers.JSONResponse(w, http.StatusOK, &result)
 }
 
 func (uc *UsersHandler) GetById(w http.ResponseWriter, r *http.Request) {
@@ -33,43 +41,47 @@ func (uc *UsersHandler) GetById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := uc.UserService.GetUserById(&id)
-	if err != nil {
-		helpers.JSONResponseError(w, http.StatusServiceUnavailable, err)
-		return
-	}
-	if user == nil {
+	user, responseCode := uc.UserService.GetUserById(&id)
+
+	if responseCode == shared.NonExistentRecord {
 		helpers.JSONResponseError(w, http.StatusNotFound, nil)
 		return
 	}
 
-	helpers.JSONResponse(w, http.StatusOK, user)
+	if responseCode != shared.Success {
+		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)
+		return
+	}
+
+	helpers.JSONResponse(w, http.StatusOK, dto.MapUserResponseFrom(user))
 }
 
 func (uc *UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var user models.User
+	var requestData dto.UserCreateRequest
 
-	if err := helpers.ReadJSONBody(r, &user); err != nil {
+	if err := helpers.ReadJSONBody(r, &requestData); err != nil {
 		helpers.JSONResponseError(w, http.StatusBadRequest, err)
 		return
 	}
 
-	if err := user.Validate(); err != nil {
+	if err := requestData.Validate(); err != nil {
 		helpers.JSONResponseError(w, http.StatusBadRequest, err)
 		return
 	}
 
-	isDuplicated, err := uc.UserService.CreateNewUser(&user)
-	if err != nil {
-		helpers.JSONResponseError(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-	if isDuplicated {
-		helpers.JSONResponse(w, http.StatusConflict, errors.New("usuário já cadastrado"))
+	u := models.MapUserFrom(
+		requestData.Name,
+		requestData.Phone,
+		requestData.Role,
+		false)
+
+	responseCode := uc.UserService.CreateNewUser(&u)
+	if responseCode != shared.Success {
+		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)
 		return
 	}
 
-	helpers.JSONResponse(w, http.StatusCreated, &user)
+	helpers.JSONResponse(w, http.StatusCreated, dto.MapUserResponseFrom(&u))
 }
 
 func (uc *UsersHandler) Update(w http.ResponseWriter, r *http.Request) {
@@ -86,10 +98,10 @@ func (uc *UsersHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := user.Validate(); err != nil {
-		helpers.JSONResponseError(w, http.StatusBadRequest, err)
-		return
-	}
+	// if err := user.Validate(); err != nil {
+	// 	helpers.JSONResponseError(w, http.StatusBadRequest, err)
+	// 	return
+	// }
 
 	isFound, err := uc.UserService.UpdateUser(&id, &user)
 
@@ -113,13 +125,15 @@ func (uc *UsersHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found, err := uc.UserService.DeleteUserById(&id)
-	if err != nil {
-		helpers.JSONResponseError(w, http.StatusServiceUnavailable, err)
+	responseCode := uc.UserService.DeleteUserById(&id)
+
+	if responseCode == shared.NonExistentRecord {
+		helpers.JSONResponseError(w, http.StatusNotFound, nil)
 		return
 	}
-	if !found {
-		helpers.JSONResponseError(w, http.StatusNotFound, nil)
+
+	if responseCode != shared.Success {
+		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)
 		return
 	}
 

@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/online.scheduling-api/src/handlers"
+	api "github.com/online.scheduling-api/src/api/handlers"
 	"github.com/sarulabs/di"
 )
 
@@ -16,7 +16,7 @@ func ConfigureRouter(ctn di.Container) *mux.Router {
 }
 
 func configureUserRoutes(r *mux.Router, ctn di.Container) {
-	handler := ctn.Get("user-handler").(*handlers.UsersHandler)
+	handler := ctn.Get("user-handler").(*api.UsersHandler)
 
 	r.HandleFunc("/api/users", handler.GetAll).Methods("GET")
 	r.HandleFunc("/api/users/{id}", handler.GetById).Methods("GET")

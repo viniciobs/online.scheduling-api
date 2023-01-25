@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+
+	"github.com/online.scheduling-api/src/shared"
 )
 
 func JSONResponseError(w http.ResponseWriter, status int, err error) {
@@ -45,4 +47,17 @@ func ReadBody(r *http.Request) ([]byte, error) {
 	r.Body = io.NopCloser(bytes.NewBuffer(body))
 
 	return body, nil
+}
+
+func GetErrorStatusCodeFrom(responseCode shared.Code) int {
+	switch responseCode {
+	case shared.DuplicatedRecord:
+		return http.StatusUnprocessableEntity
+	case shared.NonExistentRecord:
+		return http.StatusNotFound
+	case shared.ThirdPartyFail:
+		return http.StatusBadGateway
+	default:
+		return http.StatusInternalServerError
+	}
 }

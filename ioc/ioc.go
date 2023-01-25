@@ -12,9 +12,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
 	"github.com/online.scheduling-api/config"
-	"github.com/online.scheduling-api/src/handlers"
+	api "github.com/online.scheduling-api/src/api/handlers"
 	"github.com/online.scheduling-api/src/helpers"
-	"github.com/online.scheduling-api/src/repository"
+	"github.com/online.scheduling-api/src/infra/repository"
 	"github.com/online.scheduling-api/src/services"
 )
 
@@ -51,7 +51,7 @@ var Services = []di.Def{
 		Name:  "user-handler",
 		Scope: di.Request,
 		Build: func(ctn di.Container) (interface{}, error) {
-			return &handlers.UsersHandler{
+			return &api.UsersHandler{
 				UserService: ctn.Get("user-service").(*services.UserServices),
 			}, nil
 		},

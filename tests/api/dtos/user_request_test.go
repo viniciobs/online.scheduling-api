@@ -1,14 +1,14 @@
-package test_models
+package test_api_dtos
 
 import (
 	"testing"
 
-	"github.com/online.scheduling-api/src/models"
+	dto "github.com/online.scheduling-api/src/api/dtos"
 )
 
 func TestShouldReturnErrorWhenNameIsEmptyString(t *testing.T) {
 	// Arrange
-	u := models.User{
+	u := dto.UserCreateRequest{
 		Name:  "",
 		Phone: "24999999999",
 	}
@@ -24,7 +24,7 @@ func TestShouldReturnErrorWhenNameIsEmptyString(t *testing.T) {
 
 func TestShouldReturnErrorWhenPhoneIsEmptyString(t *testing.T) {
 	// Arrange
-	u := models.User{
+	u := dto.UserCreateRequest{
 		Name:  "Test",
 		Phone: "",
 	}
@@ -40,7 +40,7 @@ func TestShouldReturnErrorWhenPhoneIsEmptyString(t *testing.T) {
 
 func TestShouldReturnErrorWhenPhoneNumberIsNotAValidPhoneNumber(t *testing.T) {
 	// Arrange
-	u := models.User{
+	u := dto.UserCreateRequest{
 		Name:  "Test",
 		Phone: "123ABC-_ ",
 	}
@@ -56,7 +56,7 @@ func TestShouldReturnErrorWhenPhoneNumberIsNotAValidPhoneNumber(t *testing.T) {
 
 func TestShouldNotReturnErrorWhenGivenUserIsValid(t *testing.T) {
 	// Arrange
-	u := models.User{
+	u := dto.UserCreateRequest{
 		Name:  "Lorem Ipsum",
 		Phone: "24999999999",
 	}

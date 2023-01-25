@@ -24,12 +24,12 @@ type UserRepository struct {
 }
 
 func (ur *UserRepository) GetAllUsers() ([]*models.User, error) {
-	users := []*models.User{}
-
 	cursor, err := ur.collection().Find(context.TODO(), bson.M{})
 	if err != nil {
 		return nil, err
 	}
+
+	users := []*models.User{}
 
 	for cursor.Next(context.TODO()) {
 		var user models.User
@@ -44,9 +44,12 @@ func (ur *UserRepository) GetAllUsers() ([]*models.User, error) {
 func (ur *UserRepository) GetUserById(uuid *uuid.UUID) (*models.User, error) {
 	var user *models.User
 
-	filter := &bson.M{"id": uuid}
+	err := ur.collection().
+		FindOne(
+			context.TODO(),
+			&bson.M{"id": uuid}).
+		Decode(&user)
 
-	err := ur.collection().FindOne(context.TODO(), filter).Decode(&user)
 	if err == mongo.ErrNoDocuments {
 		return nil, nil
 	}
@@ -77,8 +80,10 @@ func (ur *UserRepository) UpdateUser(uuid *uuid.UUID, u *models.User) (isFound b
 }
 
 func (ur *UserRepository) DeleteUserById(uuid *uuid.UUID) (isFound bool, err error) {
-	filter := &bson.M{"id": uuid}
-	res, err := ur.collection().DeleteOne(context.TODO(), filter)
+	res, err := ur.collection().
+		DeleteOne(
+			context.TODO(),
+			&bson.M{"id": uuid})
 
 	if err != nil {
 		return false, err
@@ -92,18 +97,21 @@ func (ur *UserRepository) DeleteUserById(uuid *uuid.UUID) (isFound bool, err err
 }
 
 func (ur *UserRepository) ExistsByPhone(phone string) (bool, error) {
-	filter := &bson.M{"phone": phone}
-
-	result := ur.collection().FindOne(context.TODO(), filter)
-	err := result.Err()
+	err := ur.collection().
+		FindOne(
+			context.TODO(),
+			&bson.M{"phone": phone}).
+		Err()
 
 	if err == mongo.ErrNoDocuments {
 		return false, nil
 	}
 
-	return true, err
+	return err == nil, err
 }
 
 func (ur *UserRepository) collection() *mongo.Collection {
-	return ur.Client.Database(config.GetDBName()).Collection(config.GetUsersCollection())
+	return ur.Client.
+		Database(config.GetDBName()).
+		Collection(config.GetUsersCollection())
 }
