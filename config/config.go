@@ -15,3 +15,7 @@ func GetDBName() string {
 func GetUsersCollection() string {
 	return os.Getenv("USERS_COLLECTION")
 }
+
+func GetModalitiesCollection() string {
+	return os.Getenv("MODALITIES_COLLECTION")
+}
