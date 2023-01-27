@@ -45,7 +45,7 @@ func (us *UserServices) GetUserById(uuid *uuid.UUID) (*models.User, shared.Code)
 }
 
 func (us *UserServices) CreateNewUser(u *models.User) shared.Code {
-	exists, err := us.UserRepository.ExistsByPhone(u.Phone)
+	exists, err := us.UserRepository.ExistsByPhone(&u.Id, &u.Phone)
 	if exists {
 		return shared.DuplicatedRecord
 	}
@@ -73,8 +73,16 @@ func (us *UserServices) ActivateUser(uuid *uuid.UUID) shared.Code {
 }
 
 func (us *UserServices) EditUser(uuid *uuid.UUID, u *models.User) shared.Code {
-	err := us.UserRepository.EditUser(uuid, u)
+	exists, err := us.UserRepository.ExistsByPhone(uuid, &u.Phone)
+	if exists {
+		return shared.DuplicatedRecord
+	}
 
+	if err != nil {
+		return infraService.MapErrorFrom(err)
+	}
+
+	err = us.UserRepository.EditUser(uuid, u)
 	if err != nil {
 		return infraService.MapErrorFrom(err)
 	}

@@ -17,7 +17,7 @@ type IUserRepository interface {
 	ActivateUser(uuid *uuid.UUID) error
 	EditUser(uuid *uuid.UUID, u *models.User) error
 	DeleteUserById(uuid *uuid.UUID) (isFound bool, err error)
-	ExistsByPhone(phone string) (bool, error)
+	ExistsByPhone(uuid *uuid.UUID, phone *string) (bool, error)
 }
 
 type UserRepository struct {
@@ -117,11 +117,14 @@ func (ur *UserRepository) DeleteUserById(uuid *uuid.UUID) (isFound bool, err err
 	return true, nil
 }
 
-func (ur *UserRepository) ExistsByPhone(phone string) (bool, error) {
+func (ur *UserRepository) ExistsByPhone(uuid *uuid.UUID, phone *string) (bool, error) {
 	err := ur.collection().
 		FindOne(
 			context.TODO(),
-			&bson.M{"phone": phone}).
+			&bson.M{
+				"id":    &bson.M{"$ne": uuid},
+				"phone": phone,
+			}).
 		Err()
 
 	if err == mongo.ErrNoDocuments {
