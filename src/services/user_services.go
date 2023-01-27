@@ -13,6 +13,7 @@ type IUserServices interface {
 	GetUserById(uuid *uuid.UUID) (*models.User, shared.Code)
 	CreateNewUser(u *models.User) shared.Code
 	ActivateUser(uuid *uuid.UUID) shared.Code
+	EditUser(uuid *uuid.UUID, u *models.User) shared.Code
 	DeleteUserById(uuid *uuid.UUID) shared.Code
 }
 
@@ -63,6 +64,16 @@ func (us *UserServices) CreateNewUser(u *models.User) shared.Code {
 
 func (us *UserServices) ActivateUser(uuid *uuid.UUID) shared.Code {
 	err := us.UserRepository.ActivateUser(uuid)
+
+	if err != nil {
+		return infraService.MapErrorFrom(err)
+	}
+
+	return shared.Success
+}
+
+func (us *UserServices) EditUser(uuid *uuid.UUID, u *models.User) shared.Code {
+	err := us.UserRepository.EditUser(uuid, u)
 
 	if err != nil {
 		return infraService.MapErrorFrom(err)

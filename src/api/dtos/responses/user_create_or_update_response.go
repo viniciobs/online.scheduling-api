@@ -5,7 +5,7 @@ import (
 	"github.com/online.scheduling-api/src/models"
 )
 
-type UserCreateResponse struct {
+type UserCreateOrUpdateResponse struct {
 	Id              uuid.UUID   `json:"id"`
 	Name            string      `json:"name"`
 	Phone           string      `json:"phone"`
@@ -14,8 +14,8 @@ type UserCreateResponse struct {
 	IsActive        bool        `json:"isActive"`
 }
 
-func MapUserResponseFrom(u *models.User) UserCreateResponse {
-	return UserCreateResponse{
+func MapUserResponseFrom(u *models.User) UserCreateOrUpdateResponse {
+	return UserCreateOrUpdateResponse{
 		Id:              u.Id,
 		Name:            u.Name,
 		Phone:           u.Phone,

@@ -20,3 +20,7 @@ func (r Role) GetDescription() string {
 		return ""
 	}
 }
+
+func (r Role) IsDefined() bool {
+	return r == Admin || r == Worker || r == Customer
+}

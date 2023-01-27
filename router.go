@@ -22,5 +22,6 @@ func configureUserRoutes(r *mux.Router, ctn di.Container) {
 	r.HandleFunc("/api/users/{id}", handler.GetById).Methods("GET")
 	r.HandleFunc("/api/users", handler.Create).Methods("POST")
 	r.HandleFunc("/api/users/{id}/activate", handler.Activate).Methods("PATCH")
+	r.HandleFunc("/api/users/{id}/edit", handler.Edit).Methods("PATCH")
 	r.HandleFunc("/api/users/{id}", handler.Delete).Methods("DELETE")
 }
