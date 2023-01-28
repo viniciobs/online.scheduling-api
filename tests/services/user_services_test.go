@@ -1,4 +1,4 @@
-package test_services
+package tests
 
 import (
 	"testing"
@@ -12,16 +12,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func TestShouldReturnIsDuplicatedEqualTrueWhenTryingToCreateUserWithPhoneAlreadyRegistered(t *testing.T) {
+func TestShouldReturnIsDuplicatedEqualTrueWhenTryingToCreateUserWithPhoneAlreadyRegisteredToOtherUser(t *testing.T) {
 	// Arrange
-	const Phone = "99999999999"
+	phone := "99999999999"
+	id := uuid.New()
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
 	repo := mock_repository.NewMockIUserRepository(mockCtrl)
 	repo.EXPECT().
-		ExistsByPhone(Phone).
+		ExistsByPhone(&id, &phone).
 		Return(true, nil).
 		Times(1)
 
@@ -30,9 +31,9 @@ func TestShouldReturnIsDuplicatedEqualTrueWhenTryingToCreateUserWithPhoneAlready
 	}
 
 	u := models.User{
-		Id:       uuid.New(),
+		Id:       id,
 		Name:     "Test",
-		Phone:    Phone,
+		Phone:    phone,
 		IsActive: true,
 		Role:     models.Admin,
 	}
@@ -42,7 +43,7 @@ func TestShouldReturnIsDuplicatedEqualTrueWhenTryingToCreateUserWithPhoneAlready
 
 	// Assert
 	if code != shared.DuplicatedRecord {
-		t.Errorf("Expecting response code to be %s when creating user which phone is already registered, But got %s", shared.DuplicatedRecord, code)
+		t.Errorf("Expecting response code to be %s when creating user which phone is already registered to other, But got %s", shared.DuplicatedRecord, code)
 	}
 }
 
@@ -61,7 +62,7 @@ func TestShouldReturnSuccessWhenTryingToCreateUserWithPhoneNotRegistered(t *test
 
 	repo := mock_repository.NewMockIUserRepository(mockCtrl)
 	repo.EXPECT().
-		ExistsByPhone(u.Phone).
+		ExistsByPhone(&u.Id, &u.Phone).
 		Return(false, nil).
 		Times(1)
 	repo.EXPECT().
@@ -97,7 +98,7 @@ func TestShouldReturnThirdPartyFailWhenDatabaseIsNotConnected(t *testing.T) {
 
 	repo := mock_repository.NewMockIUserRepository(mockCtrl)
 	repo.EXPECT().
-		ExistsByPhone(u.Phone).
+		ExistsByPhone(&u.Id, &u.Phone).
 		Return(false, mongo.ErrClientDisconnected).
 		Times(1)
 

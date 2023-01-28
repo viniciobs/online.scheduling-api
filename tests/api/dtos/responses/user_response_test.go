@@ -1,14 +1,14 @@
-package test_api_dtos
+package tests
 
 import (
 	"testing"
 
 	"github.com/google/uuid"
-	api "github.com/online.scheduling-api/src/api/dtos"
+	api "github.com/online.scheduling-api/src/api/dtos/responses"
 	"github.com/online.scheduling-api/src/models"
 )
 
-func TestShouldMapSuccessfully(t *testing.T) {
+func TestShouldMapUserSuccessfully(t *testing.T) {
 	// Arrange
 	id := uuid.New()
 
