@@ -49,19 +49,19 @@ func (mr *MockIModalityRepositoryMockRecorder) CreateNewModality(m interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNewModality", reflect.TypeOf((*MockIModalityRepository)(nil).CreateNewModality), m)
 }
 
-// DeleteSModalityById mocks base method.
-func (m *MockIModalityRepository) DeleteSModalityById(uuid *uuid.UUID) (bool, error) {
+// DeleteModalityById mocks base method.
+func (m *MockIModalityRepository) DeleteModalityById(uuid *uuid.UUID) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteSModalityById", uuid)
+	ret := m.ctrl.Call(m, "DeleteModalityById", uuid)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// DeleteSModalityById indicates an expected call of DeleteSModalityById.
-func (mr *MockIModalityRepositoryMockRecorder) DeleteSModalityById(uuid interface{}) *gomock.Call {
+// DeleteModalityById indicates an expected call of DeleteModalityById.
+func (mr *MockIModalityRepositoryMockRecorder) DeleteModalityById(uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSModalityById", reflect.TypeOf((*MockIModalityRepository)(nil).DeleteSModalityById), uuid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteModalityById", reflect.TypeOf((*MockIModalityRepository)(nil).DeleteModalityById), uuid)
 }
 
 // EditModality mocks base method.
@@ -76,6 +76,21 @@ func (m_2 *MockIModalityRepository) EditModality(uuid *uuid.UUID, m *models.Moda
 func (mr *MockIModalityRepositoryMockRecorder) EditModality(uuid, m interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EditModality", reflect.TypeOf((*MockIModalityRepository)(nil).EditModality), uuid, m)
+}
+
+// ExistsByName mocks base method.
+func (m *MockIModalityRepository) ExistsByName(uuid *uuid.UUID, name *string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExistsByName", uuid, name)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExistsByName indicates an expected call of ExistsByName.
+func (mr *MockIModalityRepositoryMockRecorder) ExistsByName(uuid, name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsByName", reflect.TypeOf((*MockIModalityRepository)(nil).ExistsByName), uuid, name)
 }
 
 // GetAllModalities mocks base method.

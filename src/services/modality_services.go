@@ -17,7 +17,7 @@ type IModalityService interface {
 }
 
 type ModalityService struct {
-	ModalityRepository *repository.ModalityRepository
+	ModalityRepository repository.IModalityRepository
 }
 
 func (ms *ModalityService) GetAllModalities() ([]*models.Modality, shared.Code) {
