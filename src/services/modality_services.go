@@ -9,7 +9,7 @@ import (
 )
 
 type IModalityService interface {
-	GetAllModalities() ([]*models.Modality, shared.Code)
+	GetModalities(filter *models.ModalityFilter) ([]models.Modality, shared.Code)
 	GetModalityById(uuid *uuid.UUID) (*models.Modality, shared.Code)
 	CreateNewModality(m *models.Modality) shared.Code
 	EditModality(uuid *uuid.UUID, m *models.Modality) shared.Code
@@ -20,8 +20,8 @@ type ModalityService struct {
 	ModalityRepository repository.IModalityRepository
 }
 
-func (ms *ModalityService) GetAllModalities() ([]*models.Modality, shared.Code) {
-	result, err := ms.ModalityRepository.GetAllModalities()
+func (ms *ModalityService) GetModalities(filter *models.ModalityFilter) ([]models.Modality, shared.Code) {
+	result, err := ms.ModalityRepository.GetModalities(filter)
 
 	if err != nil {
 		return result, infraService.MapErrorFrom(err)

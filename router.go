@@ -12,6 +12,7 @@ func ConfigureRouter(ctn di.Container) *mux.Router {
 
 	configureUserRoutes(r, request)
 	configureModalityRoutes(r, request)
+	configureUserModalityRoutes(r, request)
 
 	return r
 }
@@ -35,4 +36,10 @@ func configureModalityRoutes(r *mux.Router, ctn di.Container) {
 	r.HandleFunc("/api/modalities", handler.Create).Methods("POST")
 	r.HandleFunc("/api/modalities/{id}/edit", handler.Edit).Methods("PATCH")
 	r.HandleFunc("/api/modalities/{id}", handler.Delete).Methods("DELETE")
+}
+
+func configureUserModalityRoutes(r *mux.Router, ctn di.Container) {
+	handler := ctn.Get("user-modalities-handler").(*api.UserModalitiesHandler)
+
+	r.HandleFunc("/api/users/{id}/modalities", handler.Edit).Methods("PUT")
 }

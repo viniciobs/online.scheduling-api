@@ -10,4 +10,5 @@ var Services = helpers.Concat(
 		GetDataServices(),
 		GetUserServices(),
 		GetModalityServices(),
+		GetUserModalitiesServices(),
 	})

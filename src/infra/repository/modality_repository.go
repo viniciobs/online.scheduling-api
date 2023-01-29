@@ -11,7 +11,7 @@ import (
 )
 
 type IModalityRepository interface {
-	GetAllModalities() ([]*models.Modality, error)
+	GetModalities(filter *models.ModalityFilter) ([]models.Modality, error)
 	GetModalityById(uuid *uuid.UUID) (*models.Modality, error)
 	CreateNewModality(m *models.Modality) error
 	EditModality(uuid *uuid.UUID, m *models.Modality) error
@@ -23,19 +23,25 @@ type ModalityRepository struct {
 	Client *mongo.Client
 }
 
-func (mr *ModalityRepository) GetAllModalities() ([]*models.Modality, error) {
-	cursor, err := mr.collection().Find(context.TODO(), bson.M{})
+func (mr *ModalityRepository) GetModalities(filter *models.ModalityFilter) ([]models.Modality, error) {
+	query := bson.M{}
+
+	if len(filter.Ids) > 0 {
+		query["id"] = bson.M{"$in": filter.Ids}
+	}
+
+	cursor, err := mr.collection().Find(context.TODO(), query)
 	if err != nil {
 		return nil, err
 	}
 
-	modalities := []*models.Modality{}
+	modalities := []models.Modality{}
 
 	for cursor.Next(context.TODO()) {
 		var modality models.Modality
 		cursor.Decode(&modality)
 
-		modalities = append(modalities, &modality)
+		modalities = append(modalities, modality)
 	}
 
 	return modalities, nil

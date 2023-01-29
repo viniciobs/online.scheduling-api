@@ -5,11 +5,12 @@ import (
 )
 
 type User struct {
-	Id       uuid.UUID `bson:"id"`
-	Name     string    `bson:"name"`
-	Phone    string    `bson:"phone"`
-	Role     Role      `bson:"role"`
-	IsActive bool      `bson:"isActive"`
+	Id         uuid.UUID  `bson:"id"`
+	Name       string     `bson:"name"`
+	Phone      string     `bson:"phone"`
+	Role       Role       `bson:"role"`
+	IsActive   bool       `bson:"isActive"`
+	Modalities []Modality `bson:"modalities"`
 }
 
 func MapUserFrom(name, phone string, role Role, active bool) User {

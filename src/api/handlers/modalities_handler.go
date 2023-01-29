@@ -19,7 +19,8 @@ type ModalityHandler struct {
 }
 
 func (h *ModalityHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	modalities, responseCode := h.ModalityService.GetAllModalities()
+	filter := models.ModalityFilter{}
+	modalities, responseCode := h.ModalityService.GetModalities(&filter)
 
 	if responseCode != shared.Success {
 		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)
@@ -29,7 +30,7 @@ func (h *ModalityHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	var result []dtoResponse.ModalityCreateOrUpdateResponse
 
 	for i := range modalities {
-		result = append(result, dtoResponse.MapModalityResponseFrom(modalities[i]))
+		result = append(result, dtoResponse.MapModalityResponseFrom(&modalities[i]))
 	}
 
 	helpers.JSONResponse(w, http.StatusOK, &result)
