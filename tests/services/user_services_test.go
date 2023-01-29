@@ -83,6 +83,38 @@ func TestShouldReturnSuccessWhenTryingToCreateUserWithPhoneNotRegistered(t *test
 	}
 }
 
+func TestShouldReturnDuplicatedRecordWhenTryingToEditUserWithPhoneAlreadyRegisteredToOtherUser(t *testing.T) {
+	// Arrange
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	u := models.User{
+		Id:       uuid.New(),
+		Name:     "Test",
+		Phone:    "99999999999",
+		IsActive: true,
+		Role:     models.Admin,
+	}
+
+	repo := mock_repository.NewMockIUserRepository(mockCtrl)
+	repo.EXPECT().
+		ExistsByPhone(&u.Id, &u.Phone).
+		Return(true, nil).
+		Times(1)
+
+	service := services.UserServices{
+		UserRepository: repo,
+	}
+
+	// Act
+	code := service.CreateNewUser(&u)
+
+	// Assert
+	if code != shared.DuplicatedRecord {
+		t.Errorf("Expecting response code to be %s when trying to update users with phone already registered to others. Got %s", shared.DuplicatedRecord, code)
+	}
+}
+
 func TestShouldReturnThirdPartyFailWhenDatabaseIsNotConnected(t *testing.T) {
 	// Arrange
 	mockCtrl := gomock.NewController(t)
