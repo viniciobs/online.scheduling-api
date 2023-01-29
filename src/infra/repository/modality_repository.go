@@ -15,7 +15,8 @@ type IModalityRepository interface {
 	GetModalityById(uuid *uuid.UUID) (*models.Modality, error)
 	CreateNewModality(m *models.Modality) error
 	EditModality(uuid *uuid.UUID, m *models.Modality) error
-	DeleteSModalityById(uuid *uuid.UUID) (isFound bool, err error)
+	DeleteModalityById(uuid *uuid.UUID) (isFound bool, err error)
+	ExistsByName(uuid *uuid.UUID, name *string) (bool, error)
 }
 
 type ModalityRepository struct {
@@ -80,7 +81,7 @@ func (mr *ModalityRepository) EditModality(uuid *uuid.UUID, m *models.Modality) 
 	return err
 }
 
-func (mr *ModalityRepository) DeleteSModalityById(uuid *uuid.UUID) (isFound bool, err error) {
+func (mr *ModalityRepository) DeleteModalityById(uuid *uuid.UUID) (isFound bool, err error) {
 	res, err := mr.collection().
 		DeleteOne(
 			context.TODO(),
@@ -97,8 +98,25 @@ func (mr *ModalityRepository) DeleteSModalityById(uuid *uuid.UUID) (isFound bool
 	return true, nil
 }
 
-func (ur *ModalityRepository) collection() *mongo.Collection {
-	return ur.Client.
+func (mr *ModalityRepository) ExistsByName(uuid *uuid.UUID, name *string) (bool, error) {
+	err := mr.collection().
+		FindOne(
+			context.TODO(),
+			&bson.M{
+				"id":   &bson.M{"$ne": uuid},
+				"name": name,
+			}).
+		Err()
+
+	if err == mongo.ErrNoDocuments {
+		return false, nil
+	}
+
+	return err == nil, err
+}
+
+func (mr *ModalityRepository) collection() *mongo.Collection {
+	return mr.Client.
 		Database(config.GetDBName()).
 		Collection(config.GetModalitiesCollection())
 }

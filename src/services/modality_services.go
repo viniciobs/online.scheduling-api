@@ -44,7 +44,16 @@ func (ms *ModalityService) GetModalityById(uuid *uuid.UUID) (*models.Modality, s
 }
 
 func (ms *ModalityService) CreateNewModality(m *models.Modality) shared.Code {
-	err := ms.ModalityRepository.CreateNewModality(m)
+	exists, err := ms.ModalityRepository.ExistsByName(&m.Id, &m.Name)
+	if exists {
+		return shared.DuplicatedRecord
+	}
+
+	if err != nil {
+		return infraService.MapErrorFrom(err)
+	}
+
+	err = ms.ModalityRepository.CreateNewModality(m)
 	if err != nil {
 		return infraService.MapErrorFrom(err)
 	}
@@ -53,7 +62,16 @@ func (ms *ModalityService) CreateNewModality(m *models.Modality) shared.Code {
 }
 
 func (ms *ModalityService) EditModality(uuid *uuid.UUID, m *models.Modality) shared.Code {
-	err := ms.ModalityRepository.EditModality(uuid, m)
+	exists, err := ms.ModalityRepository.ExistsByName(uuid, &m.Name)
+	if exists {
+		return shared.DuplicatedRecord
+	}
+
+	if err != nil {
+		return infraService.MapErrorFrom(err)
+	}
+
+	err = ms.ModalityRepository.EditModality(uuid, m)
 	if err != nil {
 		return infraService.MapErrorFrom(err)
 	}
@@ -62,7 +80,7 @@ func (ms *ModalityService) EditModality(uuid *uuid.UUID, m *models.Modality) sha
 }
 
 func (ms *ModalityService) DeleteModalityById(uuid *uuid.UUID) shared.Code {
-	isFound, err := ms.ModalityRepository.DeleteSModalityById(uuid)
+	isFound, err := ms.ModalityRepository.DeleteModalityById(uuid)
 
 	if err != nil {
 		return infraService.MapErrorFrom(err)
