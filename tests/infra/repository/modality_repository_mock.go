@@ -93,19 +93,19 @@ func (mr *MockIModalityRepositoryMockRecorder) ExistsByName(uuid, name interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsByName", reflect.TypeOf((*MockIModalityRepository)(nil).ExistsByName), uuid, name)
 }
 
-// GetAllModalities mocks base method.
-func (m *MockIModalityRepository) GetAllModalities() ([]*models.Modality, error) {
+// GetModalities mocks base method.
+func (m *MockIModalityRepository) GetModalities(filter *models.ModalityFilter) ([]models.Modality, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllModalities")
-	ret0, _ := ret[0].([]*models.Modality)
+	ret := m.ctrl.Call(m, "GetModalities", filter)
+	ret0, _ := ret[0].([]models.Modality)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetAllModalities indicates an expected call of GetAllModalities.
-func (mr *MockIModalityRepositoryMockRecorder) GetAllModalities() *gomock.Call {
+// GetModalities indicates an expected call of GetModalities.
+func (mr *MockIModalityRepositoryMockRecorder) GetModalities(filter interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllModalities", reflect.TypeOf((*MockIModalityRepository)(nil).GetAllModalities))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetModalities", reflect.TypeOf((*MockIModalityRepository)(nil).GetModalities), filter)
 }
 
 // GetModalityById mocks base method.

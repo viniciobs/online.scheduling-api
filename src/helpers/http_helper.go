@@ -53,6 +53,8 @@ func GetErrorStatusCodeFrom(responseCode shared.Code) int {
 	switch responseCode {
 	case shared.DuplicatedRecord:
 		return http.StatusUnprocessableEntity
+	case shared.InvalidOperation:
+		return http.StatusUnprocessableEntity
 	case shared.NonExistentRecord:
 		return http.StatusNotFound
 	case shared.ThirdPartyFail:

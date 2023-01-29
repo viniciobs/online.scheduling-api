@@ -16,6 +16,7 @@ type IUserRepository interface {
 	CreateNewUser(u *models.User) error
 	ActivateUser(uuid *uuid.UUID) error
 	EditUser(uuid *uuid.UUID, u *models.User) error
+	EditUserModalities(uuid *uuid.UUID, u *models.User) error
 	DeleteUserById(uuid *uuid.UUID) (isFound bool, err error)
 	ExistsByPhone(uuid *uuid.UUID, phone *string) (bool, error)
 }
@@ -69,6 +70,23 @@ func (ur *UserRepository) ActivateUser(uuid *uuid.UUID) error {
 	update := bson.M{
 		"$set": bson.M{
 			"isActive": true,
+		},
+	}
+
+	res, err := ur.collection().UpdateOne(context.TODO(), filter, update)
+
+	if res.MatchedCount == 0 {
+		return mongo.ErrNoDocuments
+	}
+
+	return err
+}
+
+func (ur *UserRepository) EditUserModalities(uuid *uuid.UUID, u *models.User) error {
+	filter := bson.M{"id": uuid}
+	update := bson.M{
+		"$set": bson.M{
+			"modalities": u.Modalities,
 		},
 	}
 

@@ -6,15 +6,22 @@ import (
 )
 
 type UserCreateOrUpdateResponse struct {
-	Id              uuid.UUID   `json:"id"`
-	Name            string      `json:"name"`
-	Phone           string      `json:"phone"`
-	RoleCode        models.Role `json:"role-code"`
-	RoleDescription string      `json:"role-description"`
-	IsActive        bool        `json:"isActive"`
+	Id              uuid.UUID         `json:"id"`
+	Name            string            `json:"name"`
+	Phone           string            `json:"phone"`
+	RoleCode        models.Role       `json:"role-code"`
+	RoleDescription string            `json:"role-description"`
+	IsActive        bool              `json:"isActive"`
+	Modalities      []models.Modality `json:"modalities"`
 }
 
 func MapUserResponseFrom(u *models.User) UserCreateOrUpdateResponse {
+	modalities := []models.Modality{}
+
+	if len(u.Modalities) > 0 {
+		modalities = u.Modalities
+	}
+
 	return UserCreateOrUpdateResponse{
 		Id:              u.Id,
 		Name:            u.Name,
@@ -22,5 +29,6 @@ func MapUserResponseFrom(u *models.User) UserCreateOrUpdateResponse {
 		IsActive:        u.IsActive,
 		RoleCode:        u.Role,
 		RoleDescription: u.Role.GetDescription(),
+		Modalities:      modalities,
 	}
 }
