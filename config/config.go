@@ -19,3 +19,11 @@ func GetUsersCollection() string {
 func GetModalitiesCollection() string {
 	return os.Getenv("MODALITIES_COLLECTION")
 }
+
+func GetMessengerBroker() string {
+	return os.Getenv("MESSENGER_BROKER")
+}
+
+func GetMessengerModalitiesEditTopic() string {
+	return os.Getenv("MESSENGER_MODALITIES_EDIT_TOPIC")
+}

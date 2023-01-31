@@ -1,9 +1,13 @@
 package services
 
 import (
+	"context"
+
 	"github.com/google/uuid"
+	"github.com/online.scheduling-api/config"
 	"github.com/online.scheduling-api/src/infra/repository"
 	infraService "github.com/online.scheduling-api/src/infra/services"
+	"github.com/online.scheduling-api/src/messenger"
 	"github.com/online.scheduling-api/src/models"
 	"github.com/online.scheduling-api/src/shared"
 )
@@ -76,6 +80,15 @@ func (ms *ModalityService) EditModality(uuid *uuid.UUID, m *models.Modality) sha
 		return infraService.MapErrorFrom(err)
 	}
 
+	go messenger.Produce(
+		context.TODO(),
+		config.GetMessengerModalitiesEditTopic(),
+		messenger.ModalitiesEdit{
+			ModalityId: *uuid,
+			Action:     messenger.Update,
+		},
+	)
+
 	return shared.Success
 }
 
@@ -89,6 +102,15 @@ func (ms *ModalityService) DeleteModalityById(uuid *uuid.UUID) shared.Code {
 	if !isFound {
 		return shared.NonExistentRecord
 	}
+
+	go messenger.Produce(
+		context.TODO(),
+		config.GetMessengerModalitiesEditTopic(),
+		messenger.ModalitiesEdit{
+			ModalityId: *uuid,
+			Action:     messenger.Delete,
+		},
+	)
 
 	return shared.Success
 }
