@@ -30,6 +30,10 @@ func (mr *ModalityRepository) GetModalities(filter *models.ModalityFilter) ([]mo
 		query["id"] = bson.M{"$in": filter.Ids}
 	}
 
+	if filter.Name != "" {
+		query["name"] = bson.M{"$regex": filter.Name, "$options": "i"}
+	}
+
 	cursor, err := mr.collection().Find(context.TODO(), query)
 	if err != nil {
 		return nil, err

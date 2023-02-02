@@ -18,8 +18,14 @@ type ModalityHandler struct {
 	ModalityService services.IModalityService
 }
 
-func (h *ModalityHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+func (h *ModalityHandler) Get(w http.ResponseWriter, r *http.Request) {
 	filter := models.ModalityFilter{}
+
+	name := r.URL.Query().Get("name")
+	if name != "" {
+		filter.Name = name
+	}
+
 	modalities, responseCode := h.ModalityService.GetModalities(&filter)
 
 	if responseCode != shared.Success {

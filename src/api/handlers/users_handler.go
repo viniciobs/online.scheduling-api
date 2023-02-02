@@ -18,8 +18,14 @@ type UsersHandler struct {
 	UserService services.IUserServices
 }
 
-func (uc *UsersHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	users, responseCode := uc.UserService.GetAllUsers()
+func (uc *UsersHandler) Get(w http.ResponseWriter, r *http.Request) {
+	filter := models.UserFilter{}
+
+	name := r.URL.Query().Get("name")
+	if name != "" {
+		filter.Name = name
+	}
+	users, responseCode := uc.UserService.Get(&filter)
 
 	if responseCode != shared.Success {
 		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)

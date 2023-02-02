@@ -11,7 +11,7 @@ import (
 )
 
 type IUserRepository interface {
-	GetAllUsers() ([]*models.User, error)
+	Get(*models.UserFilter) ([]*models.User, error)
 	GetUserById(uuid *uuid.UUID) (*models.User, error)
 	CreateNewUser(u *models.User) error
 	ActivateUser(uuid *uuid.UUID) error
@@ -26,8 +26,14 @@ type UserRepository struct {
 	Client *mongo.Client
 }
 
-func (ur *UserRepository) GetAllUsers() ([]*models.User, error) {
-	cursor, err := ur.collection().Find(context.TODO(), bson.M{})
+func (ur *UserRepository) Get(filter *models.UserFilter) ([]*models.User, error) {
+	query := bson.M{}
+
+	if filter.Name != "" {
+		query["name"] = bson.M{"$regex": filter.Name, "$options": "i"}
+	}
+
+	cursor, err := ur.collection().Find(context.TODO(), query)
 	if err != nil {
 		return nil, err
 	}

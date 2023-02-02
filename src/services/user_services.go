@@ -9,7 +9,7 @@ import (
 )
 
 type IUserServices interface {
-	GetAllUsers() ([]*models.User, shared.Code)
+	Get(*models.UserFilter) ([]*models.User, shared.Code)
 	GetUserById(uuid *uuid.UUID) (*models.User, shared.Code)
 	CreateNewUser(u *models.User) shared.Code
 	ActivateUser(uuid *uuid.UUID) shared.Code
@@ -21,8 +21,8 @@ type UserServices struct {
 	UserRepository repository.IUserRepository
 }
 
-func (us *UserServices) GetAllUsers() ([]*models.User, shared.Code) {
-	result, err := us.UserRepository.GetAllUsers()
+func (us *UserServices) Get(filter *models.UserFilter) ([]*models.User, shared.Code) {
+	result, err := us.UserRepository.Get(filter)
 
 	if err != nil {
 		return result, infraService.MapErrorFrom(err)

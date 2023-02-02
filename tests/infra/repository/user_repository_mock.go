@@ -121,19 +121,19 @@ func (mr *MockIUserRepositoryMockRecorder) ExistsByPhone(uuid, phone interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsByPhone", reflect.TypeOf((*MockIUserRepository)(nil).ExistsByPhone), uuid, phone)
 }
 
-// GetAllUsers mocks base method.
-func (m *MockIUserRepository) GetAllUsers() ([]*models.User, error) {
+// Get mocks base method.
+func (m *MockIUserRepository) Get(arg0 *models.UserFilter) ([]*models.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllUsers")
+	ret := m.ctrl.Call(m, "Get", arg0)
 	ret0, _ := ret[0].([]*models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetAllUsers indicates an expected call of GetAllUsers.
-func (mr *MockIUserRepositoryMockRecorder) GetAllUsers() *gomock.Call {
+// Get indicates an expected call of Get.
+func (mr *MockIUserRepositoryMockRecorder) Get(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllUsers", reflect.TypeOf((*MockIUserRepository)(nil).GetAllUsers))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockIUserRepository)(nil).Get), arg0)
 }
 
 // GetUserById mocks base method.
