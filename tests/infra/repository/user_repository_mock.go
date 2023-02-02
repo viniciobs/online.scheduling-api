@@ -150,18 +150,3 @@ func (mr *MockIUserRepositoryMockRecorder) GetUserById(uuid interface{}) *gomock
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserById", reflect.TypeOf((*MockIUserRepository)(nil).GetUserById), uuid)
 }
-
-// GetUsersByModality mocks base method.
-func (m *MockIUserRepository) GetUsersByModality(modalityId *uuid.UUID) ([]*models.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUsersByModality", modalityId)
-	ret0, _ := ret[0].([]*models.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetUsersByModality indicates an expected call of GetUsersByModality.
-func (mr *MockIUserRepositoryMockRecorder) GetUsersByModality(modalityId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsersByModality", reflect.TypeOf((*MockIUserRepository)(nil).GetUsersByModality), modalityId)
-}

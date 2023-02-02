@@ -21,10 +21,14 @@ type UsersHandler struct {
 func (uc *UsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 	filter := models.UserFilter{}
 
-	name := r.URL.Query().Get("name")
-	if name != "" {
+	if name := r.URL.Query().Get("name"); name != "" {
 		filter.Name = name
 	}
+
+	if modality := r.URL.Query().Get("modality"); modality != "" {
+		filter.ModalityName = modality
+	}
+
 	users, responseCode := uc.UserService.Get(&filter)
 
 	if responseCode != shared.Success {

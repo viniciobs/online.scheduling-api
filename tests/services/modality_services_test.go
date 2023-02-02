@@ -99,7 +99,7 @@ func TestShouldReturnDuplicatedRecordWhenTryingToEditModalityWithNameAlreadyRegi
 
 	uRepo := mock_repository.NewMockIUserRepository(mockCtrl)
 	uRepo.EXPECT().
-		GetUsersByModality(&m.Id).
+		Get(&models.UserFilter{ModalityId: m.Id}).
 		Return(emptyUsers, nil).
 		Times(1)
 
@@ -132,7 +132,7 @@ func TestShouldReturnInvalidOperationWhenTryingToDeleteModalityInUseByUsers(t *t
 
 	uRepo := mock_repository.NewMockIUserRepository(mockCtrl)
 	uRepo.EXPECT().
-		GetUsersByModality(&m.Id).
+		Get(&models.UserFilter{ModalityId: m.Id}).
 		Return(users, nil).
 		Times(1)
 
@@ -164,7 +164,7 @@ func TestShouldReturnInvalidOperationWhenTryingToEditModalityInUseByUsers(t *tes
 
 	uRepo := mock_repository.NewMockIUserRepository(mockCtrl)
 	uRepo.EXPECT().
-		GetUsersByModality(&m.Id).
+		Get(&models.UserFilter{ModalityId: m.Id}).
 		Return(users, nil).
 		Times(1)
 

@@ -105,7 +105,10 @@ func (ms *ModalityService) DeleteModalityById(uuid *uuid.UUID) shared.Code {
 }
 
 func (ms *ModalityService) isInUse(uuid *uuid.UUID) bool {
-	users, err := ms.UserRepository.GetUsersByModality(uuid)
+	users, err := ms.UserRepository.Get(
+		&models.UserFilter{
+			ModalityId: *uuid,
+		})
 
 	if err != nil {
 		log.Panic(err.Error())
