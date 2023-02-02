@@ -83,6 +83,8 @@ func TestShouldReturnDuplicatedRecordWhenTryingToEditModalityWithNameAlreadyRegi
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	var emptyUsers []*models.User
+
 	m := models.Modality{
 		Id:          uuid.New(),
 		Name:        "Test",
@@ -95,15 +97,86 @@ func TestShouldReturnDuplicatedRecordWhenTryingToEditModalityWithNameAlreadyRegi
 		Return(true, nil).
 		Times(1)
 
+	uRepo := mock_repository.NewMockIUserRepository(mockCtrl)
+	uRepo.EXPECT().
+		GetUsersByModality(&m.Id).
+		Return(emptyUsers, nil).
+		Times(1)
+
 	service := services.ModalityService{
 		ModalityRepository: repo,
+		UserRepository:     uRepo,
 	}
 
 	// Act
-	code := service.CreateNewModality(&m)
+	code := service.EditModality(&m.Id, &m)
 
 	// Assert
 	if code != shared.DuplicatedRecord {
 		t.Errorf("Expecting response code to be %s when trying to update modality with name already registered to others. Got %s", shared.DuplicatedRecord, code)
+	}
+}
+
+func TestShouldReturnInvalidOperationWhenTryingToDeleteModalityInUseByUsers(t *testing.T) {
+	// Arrange
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	users := []*models.User{{Id: uuid.New()}}
+
+	m := models.Modality{
+		Id:          uuid.New(),
+		Name:        "Test",
+		Description: "Lorem Ipsum",
+	}
+
+	uRepo := mock_repository.NewMockIUserRepository(mockCtrl)
+	uRepo.EXPECT().
+		GetUsersByModality(&m.Id).
+		Return(users, nil).
+		Times(1)
+
+	service := services.ModalityService{
+		UserRepository: uRepo,
+	}
+
+	// Act
+	code := service.DeleteModalityById(&m.Id)
+
+	// Assert
+	if code != shared.InvalidOperation {
+		t.Errorf("Expecting response code to be %s when trying to delete modality which is in use by users. Got %s", shared.InvalidOperation, code)
+	}
+}
+
+func TestShouldReturnInvalidOperationWhenTryingToEditModalityInUseByUsers(t *testing.T) {
+	// Arrange
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	users := []*models.User{{Id: uuid.New()}}
+
+	m := models.Modality{
+		Id:          uuid.New(),
+		Name:        "Test",
+		Description: "Lorem Ipsum",
+	}
+
+	uRepo := mock_repository.NewMockIUserRepository(mockCtrl)
+	uRepo.EXPECT().
+		GetUsersByModality(&m.Id).
+		Return(users, nil).
+		Times(1)
+
+	service := services.ModalityService{
+		UserRepository: uRepo,
+	}
+
+	// Act
+	code := service.EditModality(&m.Id, &m)
+
+	// Assert
+	if code != shared.InvalidOperation {
+		t.Errorf("Expecting response code to be %s when trying to edit modality which is in use by users. Got %s", shared.InvalidOperation, code)
 	}
 }

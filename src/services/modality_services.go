@@ -1,13 +1,11 @@
 package services
 
 import (
-	"context"
+	"log"
 
 	"github.com/google/uuid"
-	"github.com/online.scheduling-api/config"
 	"github.com/online.scheduling-api/src/infra/repository"
 	infraService "github.com/online.scheduling-api/src/infra/services"
-	"github.com/online.scheduling-api/src/messenger"
 	"github.com/online.scheduling-api/src/models"
 	"github.com/online.scheduling-api/src/shared"
 )
@@ -22,6 +20,7 @@ type IModalityService interface {
 
 type ModalityService struct {
 	ModalityRepository repository.IModalityRepository
+	UserRepository     repository.IUserRepository
 }
 
 func (ms *ModalityService) GetModalities(filter *models.ModalityFilter) ([]models.Modality, shared.Code) {
@@ -66,6 +65,10 @@ func (ms *ModalityService) CreateNewModality(m *models.Modality) shared.Code {
 }
 
 func (ms *ModalityService) EditModality(uuid *uuid.UUID, m *models.Modality) shared.Code {
+	if ms.isInUse(uuid) {
+		return shared.InvalidOperation
+	}
+
 	exists, err := ms.ModalityRepository.ExistsByName(uuid, &m.Name)
 	if exists {
 		return shared.DuplicatedRecord
@@ -80,19 +83,14 @@ func (ms *ModalityService) EditModality(uuid *uuid.UUID, m *models.Modality) sha
 		return infraService.MapErrorFrom(err)
 	}
 
-	go messenger.Produce(
-		context.TODO(),
-		config.GetMessengerModalitiesEditTopic(),
-		messenger.ModalitiesEdit{
-			ModalityId: *uuid,
-			Action:     messenger.Update,
-		},
-	)
-
 	return shared.Success
 }
 
 func (ms *ModalityService) DeleteModalityById(uuid *uuid.UUID) shared.Code {
+	if ms.isInUse(uuid) {
+		return shared.InvalidOperation
+	}
+
 	isFound, err := ms.ModalityRepository.DeleteModalityById(uuid)
 
 	if err != nil {
@@ -103,14 +101,15 @@ func (ms *ModalityService) DeleteModalityById(uuid *uuid.UUID) shared.Code {
 		return shared.NonExistentRecord
 	}
 
-	go messenger.Produce(
-		context.TODO(),
-		config.GetMessengerModalitiesEditTopic(),
-		messenger.ModalitiesEdit{
-			ModalityId: *uuid,
-			Action:     messenger.Delete,
-		},
-	)
-
 	return shared.Success
+}
+
+func (ms *ModalityService) isInUse(uuid *uuid.UUID) bool {
+	users, err := ms.UserRepository.GetUsersByModality(uuid)
+
+	if err != nil {
+		log.Panic(err.Error())
+	}
+
+	return len(users) > 0
 }

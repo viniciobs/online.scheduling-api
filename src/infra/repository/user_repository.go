@@ -19,6 +19,7 @@ type IUserRepository interface {
 	EditUserModalities(uuid *uuid.UUID, u *models.User) error
 	DeleteUserById(uuid *uuid.UUID) (isFound bool, err error)
 	ExistsByPhone(uuid *uuid.UUID, phone *string) (bool, error)
+	GetUsersByModality(modalityId *uuid.UUID) ([]*models.User, error)
 }
 
 type UserRepository struct {
@@ -150,6 +151,31 @@ func (ur *UserRepository) ExistsByPhone(uuid *uuid.UUID, phone *string) (bool, e
 	}
 
 	return err == nil, err
+}
+
+func (ur *UserRepository) GetUsersByModality(modalityId *uuid.UUID) ([]*models.User, error) {
+	cursor, err := ur.collection().
+		Find(
+			context.TODO(),
+			&bson.M{
+				"modalities.id": modalityId,
+			},
+		)
+
+	if err != nil {
+		return nil, err
+	}
+
+	users := []*models.User{}
+
+	for cursor.Next(context.TODO()) {
+		var user models.User
+		cursor.Decode(&user)
+
+		users = append(users, &user)
+	}
+
+	return users, nil
 }
 
 func (ur *UserRepository) collection() *mongo.Collection {

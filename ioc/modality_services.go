@@ -25,6 +25,7 @@ func GetModalityServices() []di.Def {
 			Build: func(ctn di.Container) (interface{}, error) {
 				return &services.ModalityService{
 					ModalityRepository: ctn.Get("modality-repository").(*repository.ModalityRepository),
+					UserRepository:     ctn.Get("user-repository").(*repository.UserRepository),
 				}, nil
 			},
 		},

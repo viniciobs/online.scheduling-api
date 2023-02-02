@@ -5,7 +5,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/online.scheduling-api/config"
 	"github.com/online.scheduling-api/src/helpers"
 	"github.com/sarulabs/di"
@@ -20,10 +19,6 @@ func GetDataServices() []di.Def {
 			Name:  "mongo",
 			Scope: di.Request,
 			Build: func(ctn di.Container) (interface{}, error) {
-				if err := godotenv.Load(); err != nil {
-					log.Fatal("Error loading .env file")
-				}
-
 				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 				defer cancel()
 

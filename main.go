@@ -5,12 +5,17 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/online.scheduling-api/ioc"
 	"github.com/sarulabs/di"
 )
 
 func main() {
 	log.Println("Initializing...")
+
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 	builder, _ := di.NewBuilder()
 	builder.Add(ioc.Services...)
