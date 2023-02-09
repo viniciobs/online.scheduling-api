@@ -4,6 +4,8 @@ import (
 	"os"
 )
 
+var DeletedObjects = "DELETED_OBJECTS"
+
 func GetMongoUri() string {
 	return os.Getenv("MONGO_URI")
 }

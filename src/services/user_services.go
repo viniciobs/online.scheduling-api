@@ -1,9 +1,13 @@
 package services
 
 import (
+	"context"
+
 	"github.com/google/uuid"
+	"github.com/online.scheduling-api/config"
 	"github.com/online.scheduling-api/src/infra/repository"
 	infraService "github.com/online.scheduling-api/src/infra/services"
+	"github.com/online.scheduling-api/src/messenger"
 	"github.com/online.scheduling-api/src/models"
 	"github.com/online.scheduling-api/src/shared"
 )
@@ -100,6 +104,14 @@ func (us *UserServices) DeleteUserById(uuid *uuid.UUID) shared.Code {
 	if !isFound {
 		return shared.NonExistentRecord
 	}
+
+	go messenger.Produce(
+		context.TODO(),
+		config.DeletedObjects,
+		messenger.DeleteObjects{
+			UserId: *uuid,
+		},
+	)
 
 	return shared.Success
 }

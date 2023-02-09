@@ -14,6 +14,7 @@ type IScheduleRepository interface {
 	Get(*models.ScheduleFilter) ([]*models.Schedule, error)
 	Create(*models.Schedule) error
 	Edit(*models.Schedule) error
+	DeleteBy(userId, modalityId *uuid.UUID) (isFound bool, err error)
 }
 
 type ScheduleRepository struct {
@@ -89,6 +90,26 @@ func (sr *ScheduleRepository) Edit(schedule *models.Schedule) error {
 	}
 
 	return err
+}
+
+func (sr *ScheduleRepository) DeleteBy(userId, modalityId *uuid.UUID) (isFound bool, err error) {
+	res, err := sr.collection().
+		DeleteOne(
+			context.TODO(),
+			&bson.M{
+				"user-id":     userId,
+				"modality-id": modalityId,
+			})
+
+	if err != nil {
+		return false, err
+	}
+
+	if res.DeletedCount <= 0 {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func (sr *ScheduleRepository) collection() *mongo.Collection {
