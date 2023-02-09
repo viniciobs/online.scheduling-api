@@ -13,6 +13,7 @@ func ConfigureRouter(ctn di.Container) *mux.Router {
 	configureUserRoutes(r, request)
 	configureModalityRoutes(r, request)
 	configureUserModalityRoutes(r, request)
+	configureScheduleRoutes(r, request)
 
 	return r
 }
@@ -42,4 +43,12 @@ func configureUserModalityRoutes(r *mux.Router, ctn di.Container) {
 	handler := ctn.Get("user-modalities-handler").(*api.UserModalitiesHandler)
 
 	r.HandleFunc("/api/users/{id}/modalities", handler.Edit).Methods("PUT")
+}
+
+func configureScheduleRoutes(r *mux.Router, ctn di.Container) {
+	handler := ctn.Get("schedule-handler").(*api.SchedulesHandler)
+
+	r.HandleFunc("/api/schedules", handler.Get).Methods("GET")
+	r.HandleFunc("/api/schedules", handler.Create).Methods("POST")
+	r.HandleFunc("/api/schedules", handler.Edit).Methods("PUT")
 }

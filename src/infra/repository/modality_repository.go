@@ -128,5 +128,5 @@ func (mr *ModalityRepository) ExistsByName(uuid *uuid.UUID, name *string) (bool,
 func (mr *ModalityRepository) collection() *mongo.Collection {
 	return mr.Client.
 		Database(config.GetDBName()).
-		Collection(config.GetModalitiesCollection())
+		Collection("MODALITIES")
 }

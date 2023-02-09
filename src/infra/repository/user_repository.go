@@ -165,5 +165,5 @@ func (ur *UserRepository) ExistsByPhone(uuid *uuid.UUID, phone *string) (bool, e
 func (ur *UserRepository) collection() *mongo.Collection {
 	return ur.Client.
 		Database(config.GetDBName()).
-		Collection(config.GetUsersCollection())
+		Collection("USERS")
 }

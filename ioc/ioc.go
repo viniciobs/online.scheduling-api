@@ -11,4 +11,5 @@ var Services = helpers.Concat(
 		GetUserServices(),
 		GetModalityServices(),
 		GetUserModalitiesServices(),
+		GetSchedulingServices(),
 	})
