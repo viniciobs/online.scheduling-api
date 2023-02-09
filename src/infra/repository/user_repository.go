@@ -32,6 +32,10 @@ func (ur *UserRepository) Get(filter *models.UserFilter) ([]*models.User, error)
 		query["name"] = bson.M{"$regex": filter.Name, "$options": "i"}
 	}
 
+	if filter.ModalityId != uuid.Nil {
+		query["modalities.id"] = filter.ModalityId
+	}
+
 	if filter.ModalityName != "" {
 		query["modalities.name"] = bson.M{"$regex": filter.ModalityName, "$options": "i"}
 	}
