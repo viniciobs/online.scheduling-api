@@ -12,6 +12,7 @@ type IScheduleService interface {
 	Get(*models.ScheduleFilter) ([]*models.Schedule, shared.Code)
 	Create(user, modality *uuid.UUID, availability []*models.Availability) shared.Code
 	Edit(user, modality *uuid.UUID, availability []*models.Availability) shared.Code
+	DeleteBy(userId, modalityId *uuid.UUID) shared.Code
 }
 
 type ScheduleService struct {
@@ -113,6 +114,20 @@ func (s *ScheduleService) Edit(userId, modalityId *uuid.UUID, availability []*mo
 
 	if err := s.ScheduleRepository.Edit(schedule); err != nil {
 		return infraService.MapErrorFrom(err)
+	}
+
+	return shared.Success
+}
+
+func (s *ScheduleService) DeleteBy(userId, modalityId *uuid.UUID) shared.Code {
+	isFound, err := s.ScheduleRepository.DeleteBy(userId, modalityId)
+
+	if err != nil {
+		return infraService.MapErrorFrom(err)
+	}
+
+	if !isFound {
+		return shared.NonExistentRecord
 	}
 
 	return shared.Success

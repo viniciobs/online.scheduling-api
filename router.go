@@ -51,4 +51,5 @@ func configureScheduleRoutes(r *mux.Router, ctn di.Container) {
 	r.HandleFunc("/api/schedules", handler.Get).Methods("GET")
 	r.HandleFunc("/api/schedules", handler.Create).Methods("POST")
 	r.HandleFunc("/api/schedules", handler.Edit).Methods("PUT")
+	r.HandleFunc("/api/schedules", handler.Delete).Methods("DELETE")
 }

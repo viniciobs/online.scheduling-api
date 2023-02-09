@@ -93,13 +93,17 @@ func (sr *ScheduleRepository) Edit(schedule *models.Schedule) error {
 }
 
 func (sr *ScheduleRepository) DeleteBy(userId, modalityId *uuid.UUID) (isFound bool, err error) {
-	res, err := sr.collection().
-		DeleteOne(
-			context.TODO(),
-			&bson.M{
-				"user-id":     userId,
-				"modality-id": modalityId,
-			})
+	query := bson.M{}
+
+	if *userId != uuid.Nil {
+		query["user-id"] = userId
+	}
+
+	if *modalityId != uuid.Nil {
+		query["modality-id"] = modalityId
+	}
+
+	res, err := sr.collection().DeleteOne(context.TODO(), query)
 
 	if err != nil {
 		return false, err

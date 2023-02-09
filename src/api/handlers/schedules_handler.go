@@ -100,6 +100,34 @@ func (h *SchedulesHandler) Edit(w http.ResponseWriter, r *http.Request) {
 	helpers.JSONResponse(w, http.StatusNoContent, nil)
 }
 
+func (h *SchedulesHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	var requestData dtoRequest.ScheduleDeleteRequest
+
+	if err := helpers.ReadJSONBody(r, &requestData); err != nil {
+		helpers.JSONResponse(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if *requestData.ModalityId == uuid.Nil || *requestData.UserId == uuid.Nil {
+		helpers.JSONResponse(w, http.StatusBadRequest, nil)
+		return
+	}
+
+	responseCode := h.ScheduleService.DeleteBy(requestData.UserId, requestData.ModalityId)
+
+	if responseCode == shared.NonExistentRecord {
+		helpers.JSONResponseError(w, http.StatusNotFound, nil)
+		return
+	}
+
+	if responseCode != shared.Success {
+		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)
+		return
+	}
+
+	helpers.JSONResponse(w, http.StatusNoContent, nil)
+}
+
 func getRequestData(r *http.Request) (dtoRequest.ScheduleCreateOrUpdateRequest, error) {
 	var requestData dtoRequest.ScheduleCreateOrUpdateRequest
 
