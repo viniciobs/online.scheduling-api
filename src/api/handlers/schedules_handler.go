@@ -1,10 +1,13 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
+	"github.com/online.scheduling-api/constants"
 	dtoRequest "github.com/online.scheduling-api/src/api/dtos/requests"
 	validator "github.com/online.scheduling-api/src/api/dtos/validators"
 	"github.com/online.scheduling-api/src/helpers"
@@ -19,6 +22,18 @@ type SchedulesHandler struct {
 
 func (h *SchedulesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	filter := models.ScheduleFilter{}
+
+	token, err := helpers.RetrieveToken(r)
+	if err != nil {
+		helpers.JSONResponseError(w, http.StatusUnauthorized, errors.New("missing auth"))
+	}
+
+	claims := token.Claims.(jwt.MapClaims)
+	isCustomer := claims[constants.CLAIM_USER_ROLE].(float64) == float64(models.Customer)
+
+	if isCustomer {
+		filter.UserId, _ = uuid.Parse(claims[constants.CLAIM_USER_ID].(string))
+	}
 
 	if name := r.URL.Query().Get("user"); name != "" {
 		filter.UserName = name

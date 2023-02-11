@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/google/uuid"
-	"github.com/online.scheduling-api/config"
+	"github.com/online.scheduling-api/constants"
 	"github.com/online.scheduling-api/src/infra/repository"
 	infraService "github.com/online.scheduling-api/src/infra/services"
 	"github.com/online.scheduling-api/src/messenger"
@@ -106,7 +106,7 @@ func (ms *ModalityService) DeleteModalityById(uuid *uuid.UUID) shared.Code {
 
 	go messenger.Produce(
 		context.TODO(),
-		config.DeletedObjects,
+		constants.DELETED_OBJECTS_TOPIC,
 		messenger.DeleteObjects{
 			ModalityId: *uuid,
 		},

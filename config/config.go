@@ -4,10 +4,8 @@ import (
 	"os"
 )
 
-var DeletedObjects = "DELETED_OBJECTS"
-
-func GetMongoUri() string {
-	return os.Getenv("MONGO_URI")
+func GetConnection() string {
+	return os.Getenv("CONN_STR")
 }
 
 func GetDBName() string {
@@ -16,4 +14,8 @@ func GetDBName() string {
 
 func GetMessengerBroker() string {
 	return os.Getenv("MESSENGER_BROKER")
+}
+
+func GetSecretKey() []byte {
+	return []byte(os.Getenv("SECRET_KEY"))
 }

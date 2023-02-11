@@ -4,7 +4,8 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/online.scheduling-api/config"
+	"github.com/online.scheduling-api/constants"
+	"github.com/online.scheduling-api/src/helpers"
 	"github.com/online.scheduling-api/src/infra/repository"
 	infraService "github.com/online.scheduling-api/src/infra/services"
 	"github.com/online.scheduling-api/src/messenger"
@@ -15,14 +16,16 @@ import (
 type IUserServices interface {
 	Get(*models.UserFilter) ([]*models.User, shared.Code)
 	GetUserById(uuid *uuid.UUID) (*models.User, shared.Code)
-	CreateNewUser(u *models.User) shared.Code
+	CreateNewUser(u *models.User) (code shared.Code, token string)
 	ActivateUser(uuid *uuid.UUID) shared.Code
 	EditUser(uuid *uuid.UUID, u *models.User) shared.Code
+	EditModalities(userId *uuid.UUID, modalitiesIds []uuid.UUID) shared.Code
 	DeleteUserById(uuid *uuid.UUID) shared.Code
 }
 
 type UserServices struct {
-	UserRepository repository.IUserRepository
+	UserRepository     repository.IUserRepository
+	ModalityRepository repository.IModalityRepository
 }
 
 func (us *UserServices) Get(filter *models.UserFilter) ([]*models.User, shared.Code) {
@@ -48,22 +51,27 @@ func (us *UserServices) GetUserById(uuid *uuid.UUID) (*models.User, shared.Code)
 	return result, shared.Success
 }
 
-func (us *UserServices) CreateNewUser(u *models.User) shared.Code {
-	exists, err := us.UserRepository.ExistsByPhone(&u.Id, &u.Phone)
+func (us *UserServices) CreateNewUser(u *models.User) (code shared.Code, token string) {
+	exists, err := us.UserRepository.ExistsBy(&u.Id, &u.Phone, &u.Login)
+	if err != nil {
+		return infraService.MapErrorFrom(err), token
+	}
 	if exists {
-		return shared.DuplicatedRecord
+		return shared.DuplicatedRecord, token
 	}
 
-	if err != nil {
-		return infraService.MapErrorFrom(err)
+	u.Passphrase = helpers.Crypt(u.Passphrase)
+
+	if err = us.UserRepository.CreateNewUser(u); err != nil {
+		return infraService.MapErrorFrom(err), token
 	}
 
-	err = us.UserRepository.CreateNewUser(u)
-	if err != nil {
-		return infraService.MapErrorFrom(err)
+	claims := models.MapUserClaimsFrom(u)
+	if token, err = helpers.CreateTokenFor(claims); err != nil {
+		return infraService.MapErrorFrom(err), token
 	}
 
-	return shared.Success
+	return shared.Success, token
 }
 
 func (us *UserServices) ActivateUser(uuid *uuid.UUID) shared.Code {
@@ -77,7 +85,7 @@ func (us *UserServices) ActivateUser(uuid *uuid.UUID) shared.Code {
 }
 
 func (us *UserServices) EditUser(uuid *uuid.UUID, u *models.User) shared.Code {
-	exists, err := us.UserRepository.ExistsByPhone(uuid, &u.Phone)
+	exists, err := us.UserRepository.ExistsBy(uuid, &u.Phone, &u.Login)
 	if exists {
 		return shared.DuplicatedRecord
 	}
@@ -87,6 +95,33 @@ func (us *UserServices) EditUser(uuid *uuid.UUID, u *models.User) shared.Code {
 	}
 
 	err = us.UserRepository.EditUser(uuid, u)
+	if err != nil {
+		return infraService.MapErrorFrom(err)
+	}
+
+	return shared.Success
+}
+
+func (us *UserServices) EditModalities(userId *uuid.UUID, modalitiesIds []uuid.UUID) shared.Code {
+	user, err := us.UserRepository.GetUserById(userId)
+	if err != nil {
+		return shared.NonExistentRecord
+	}
+
+	if !user.IsActive {
+		return shared.InvalidOperation
+	}
+
+	modalities, err := us.ModalityRepository.GetModalities(&models.ModalityFilter{Ids: modalitiesIds})
+	if err != nil {
+		return infraService.MapErrorFrom(err)
+	}
+
+	// TODO: the above code could be executed at same time
+
+	user.Modalities = modalities
+
+	err = us.UserRepository.EditUserModalities(userId, user)
 	if err != nil {
 		return infraService.MapErrorFrom(err)
 	}
@@ -107,7 +142,7 @@ func (us *UserServices) DeleteUserById(uuid *uuid.UUID) shared.Code {
 
 	go messenger.Produce(
 		context.TODO(),
-		config.DeletedObjects,
+		constants.DELETED_OBJECTS_TOPIC,
 		messenger.DeleteObjects{
 			UserId: *uuid,
 		},

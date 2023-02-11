@@ -1,4 +1,4 @@
-package ioc
+package di
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/online.scheduling-api/config"
+	"github.com/online.scheduling-api/constants"
 	"github.com/online.scheduling-api/src/helpers"
 	"github.com/sarulabs/di"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,14 +17,14 @@ import (
 func GetDataServices() []di.Def {
 	return []di.Def{
 		{
-			Name:  "mongo",
+			Name:  constants.DB_SERVICE,
 			Scope: di.Request,
 			Build: func(ctn di.Container) (interface{}, error) {
 				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 				defer cancel()
 
 				opt := options.Client().
-					ApplyURI(config.GetMongoUri()).
+					ApplyURI(config.GetConnection()).
 					SetRegistry(helpers.MongoRegistry)
 
 				client, _ := mongo.Connect(ctx, opt)

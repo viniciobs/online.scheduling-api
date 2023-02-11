@@ -1,4 +1,4 @@
-package ioc
+package di
 
 import (
 	"github.com/online.scheduling-api/src/helpers"
@@ -10,6 +10,6 @@ var Services = helpers.Concat(
 		GetDataServices(),
 		GetUserServices(),
 		GetModalityServices(),
-		GetUserModalitiesServices(),
 		GetSchedulingServices(),
+		GetAuthServices(),
 	})

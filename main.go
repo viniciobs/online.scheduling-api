@@ -6,8 +6,10 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-	"github.com/online.scheduling-api/ioc"
+	"github.com/online.scheduling-api/router"
 	"github.com/sarulabs/di"
+
+	_di "github.com/online.scheduling-api/di"
 )
 
 func main() {
@@ -18,12 +20,12 @@ func main() {
 	}
 
 	builder, _ := di.NewBuilder()
-	builder.Add(ioc.Services...)
+	builder.Add(_di.Services...)
 
 	app := builder.Build()
 	defer app.Delete()
 
-	router := ConfigureRouter(app)
+	router := router.ConfigureRouter(app)
 
 	srv := &http.Server{
 		Handler:      router,
