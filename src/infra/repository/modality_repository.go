@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/online.scheduling-api/config"
+	"github.com/online.scheduling-api/src/infra/data"
 	"github.com/online.scheduling-api/src/models"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gopkg.in/mgo.v2/bson"
@@ -20,7 +21,7 @@ type IModalityRepository interface {
 }
 
 type ModalityRepository struct {
-	Client *mongo.Client
+	DB *data.DB
 }
 
 func (mr *ModalityRepository) GetModalities(filter *models.ModalityFilter) ([]models.Modality, error) {
@@ -126,7 +127,7 @@ func (mr *ModalityRepository) ExistsByName(uuid *uuid.UUID, name *string) (bool,
 }
 
 func (mr *ModalityRepository) collection() *mongo.Collection {
-	return mr.Client.
+	return mr.DB.Client.
 		Database(config.GetDBName()).
 		Collection("MODALITIES")
 }

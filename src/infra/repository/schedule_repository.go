@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/online.scheduling-api/config"
+	"github.com/online.scheduling-api/src/infra/data"
 	"github.com/online.scheduling-api/src/models"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gopkg.in/mgo.v2/bson"
@@ -18,7 +19,7 @@ type IScheduleRepository interface {
 }
 
 type ScheduleRepository struct {
-	Client *mongo.Client
+	DB *data.DB
 }
 
 func (sr *ScheduleRepository) Get(filter *models.ScheduleFilter) ([]*models.Schedule, error) {
@@ -117,7 +118,7 @@ func (sr *ScheduleRepository) DeleteBy(userId, modalityId *uuid.UUID) (isFound b
 }
 
 func (sr *ScheduleRepository) collection() *mongo.Collection {
-	return sr.Client.
+	return sr.DB.Client.
 		Database(config.GetDBName()).
 		Collection("SCHEDULES")
 }

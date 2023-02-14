@@ -5,10 +5,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/online.scheduling-api/config"
 	"github.com/online.scheduling-api/constants"
-	"github.com/online.scheduling-api/src/helpers"
+	"github.com/online.scheduling-api/src/infra/data"
 	"github.com/sarulabs/di"
+
+	"github.com/online.scheduling-api/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -25,7 +26,7 @@ func GetDataServices() []di.Def {
 
 				opt := options.Client().
 					ApplyURI(config.GetConnection()).
-					SetRegistry(helpers.MongoRegistry)
+					SetRegistry(data.MongoRegistry)
 
 				client, _ := mongo.Connect(ctx, opt)
 				err := client.Ping(ctx, readpref.Primary())
@@ -34,10 +35,12 @@ func GetDataServices() []di.Def {
 					log.Fatal("Server unavailable")
 				}
 
-				return client, err
+				return &data.DB{Client: client}, err
+
+				// return data.NewDB()
 			},
 			Close: func(obj interface{}) error {
-				return obj.(*mongo.Client).Disconnect(context.TODO())
+				return obj.(*data.DB).Close()
 			},
 		},
 	}
