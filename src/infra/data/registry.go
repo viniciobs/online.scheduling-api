@@ -8,7 +8,7 @@
 // Only BSON binary subtype 0x04 is supported.
 //
 // Use as you please
-package helpers
+package data
 
 import (
 	"fmt"

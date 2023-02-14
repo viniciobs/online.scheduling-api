@@ -3,10 +3,10 @@ package di
 import (
 	"github.com/online.scheduling-api/constants"
 	api "github.com/online.scheduling-api/src/api/handlers"
+	"github.com/online.scheduling-api/src/infra/data"
 	"github.com/online.scheduling-api/src/infra/repository"
 	"github.com/online.scheduling-api/src/services"
 	"github.com/sarulabs/di"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func GetModalityServices() []di.Def {
@@ -35,7 +35,7 @@ func GetModalityServices() []di.Def {
 			Scope: di.Request,
 			Build: func(ctn di.Container) (interface{}, error) {
 				return &repository.ModalityRepository{
-					Client: ctn.Get(constants.DB_SERVICE).(*mongo.Client),
+					DB: ctn.Get(constants.DB_SERVICE).(*data.DB),
 				}, nil
 			},
 		},

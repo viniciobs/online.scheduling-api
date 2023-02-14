@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/online.scheduling-api/constants"
 	api "github.com/online.scheduling-api/src/api/handlers"
 	"github.com/online.scheduling-api/src/middlewares"
 	"github.com/online.scheduling-api/src/models"
@@ -24,14 +25,14 @@ func ConfigureRouter(ctn di.Container) *mux.Router {
 }
 
 func configureAuthRoutes(r *mux.Router, ctn di.Container) {
-	handler := ctn.Get("auth-handler").(*api.AuthHandler)
+	handler := ctn.Get(constants.AUTH_HANDLER).(*api.AuthHandler)
 
 	// No auth required
 	r.HandleFunc("/api/sign-in", handler.SignIn).Methods("POST")
 }
 
 func configureUserRoutes(r *mux.Router, ctn di.Container) {
-	handler := ctn.Get("user-handler").(*api.UsersHandler)
+	handler := ctn.Get(constants.USER_HANDLER).(*api.UsersHandler)
 
 	// No auth required
 	r.HandleFunc("/api/users", handler.Create).Methods("POST")
@@ -50,7 +51,7 @@ func configureUserRoutes(r *mux.Router, ctn di.Container) {
 }
 
 func configureModalityRoutes(r *mux.Router, ctn di.Container) {
-	handler := ctn.Get("modality-handler").(*api.ModalityHandler)
+	handler := ctn.Get(constants.MODALITY_HANDLER).(*api.ModalityHandler)
 
 	// Auth required
 	r.Handle("/api/modalities", middlewares.EnsureAuth(handler.Get)).Methods("GET")
@@ -63,7 +64,7 @@ func configureModalityRoutes(r *mux.Router, ctn di.Container) {
 }
 
 func configureScheduleRoutes(r *mux.Router, ctn di.Container) {
-	handler := ctn.Get("schedule-handler").(*api.SchedulesHandler)
+	handler := ctn.Get(constants.SCHEDULE_HANDLER).(*api.SchedulesHandler)
 
 	// No auth required
 	r.HandleFunc("/api/schedules", handler.Get).Methods("GET")

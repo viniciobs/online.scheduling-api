@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/online.scheduling-api/config"
+	"github.com/online.scheduling-api/src/infra/data"
 	"github.com/online.scheduling-api/src/models"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gopkg.in/mgo.v2/bson"
@@ -24,7 +25,7 @@ type IUserRepository interface {
 }
 
 type UserRepository struct {
-	Client *mongo.Client
+	DB *data.DB
 }
 
 func (ur *UserRepository) Get(filter *models.UserFilter) ([]*models.User, error) {
@@ -208,7 +209,7 @@ func (ur *UserRepository) EditAuth(uuid *uuid.UUID, login, passphrase string) er
 }
 
 func (ur *UserRepository) collection() *mongo.Collection {
-	return ur.Client.
+	return ur.DB.Client.
 		Database(config.GetDBName()).
 		Collection("USERS")
 }
