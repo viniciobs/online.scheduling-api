@@ -66,8 +66,8 @@ func configureModalityRoutes(r *mux.Router, ctn di.Container) {
 func configureScheduleRoutes(r *mux.Router, ctn di.Container) {
 	handler := ctn.Get(constants.SCHEDULE_HANDLER).(*api.SchedulesHandler)
 
-	// No auth required
-	r.HandleFunc("/api/schedules", handler.Get).Methods("GET")
+	// Auth required
+	r.Handle("/api/schedules", middlewares.EnsureAuth(handler.Get)).Methods("GET")
 
 	// Only Admin or Worker
 	r.Handle("/api/schedules", middlewares.EnsureRole(handler.Create, onlyAdminAndWorker)).Methods("POST")
