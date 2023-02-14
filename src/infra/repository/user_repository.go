@@ -18,7 +18,9 @@ type IUserRepository interface {
 	EditUser(uuid *uuid.UUID, u *models.User) error
 	EditUserModalities(uuid *uuid.UUID, u *models.User) error
 	DeleteUserById(uuid *uuid.UUID) (isFound bool, err error)
-	ExistsByPhone(uuid *uuid.UUID, phone *string) (bool, error)
+	ExistsBy(uuid *uuid.UUID, phone, login *string) (bool, error)
+	Authenticate(login, passphrase string) (bool, *models.User)
+	EditAuth(uuid *uuid.UUID, login, passphrase string) error
 }
 
 type UserRepository struct {
@@ -28,8 +30,12 @@ type UserRepository struct {
 func (ur *UserRepository) Get(filter *models.UserFilter) ([]*models.User, error) {
 	query := bson.M{}
 
-	if filter.Name != "" {
-		query["name"] = bson.M{"$regex": filter.Name, "$options": "i"}
+	if filter.UserId != uuid.Nil {
+		query["id"] = filter.UserId
+	}
+
+	if filter.UserName != "" {
+		query["name"] = bson.M{"$regex": filter.UserName, "$options": "i"}
 	}
 
 	if filter.ModalityId != uuid.Nil {
@@ -149,13 +155,16 @@ func (ur *UserRepository) DeleteUserById(uuid *uuid.UUID) (isFound bool, err err
 	return true, nil
 }
 
-func (ur *UserRepository) ExistsByPhone(uuid *uuid.UUID, phone *string) (bool, error) {
+func (ur *UserRepository) ExistsBy(uuid *uuid.UUID, phone, login *string) (bool, error) {
 	err := ur.collection().
 		FindOne(
 			context.TODO(),
-			&bson.M{
-				"id":    &bson.M{"$ne": uuid},
-				"phone": phone,
+			bson.M{
+				"id": bson.M{"$ne": uuid},
+				"$or": []bson.M{
+					{"phone": phone},
+					{"login": login},
+				},
 			}).
 		Err()
 
@@ -164,6 +173,38 @@ func (ur *UserRepository) ExistsByPhone(uuid *uuid.UUID, phone *string) (bool, e
 	}
 
 	return err == nil, err
+}
+
+func (ur *UserRepository) Authenticate(login, passphrase string) (bool, *models.User) {
+	var user *models.User
+
+	err := ur.collection().
+		FindOne(
+			context.TODO(),
+			&bson.M{
+				"login":      login,
+				"passphrase": passphrase,
+			}).Decode(&user)
+
+	return err == nil, user
+}
+
+func (ur *UserRepository) EditAuth(uuid *uuid.UUID, login, passphrase string) error {
+	filter := bson.M{"id": uuid}
+	update := bson.M{
+		"$set": bson.M{
+			"login":      login,
+			"passphrase": passphrase,
+		},
+	}
+
+	res, err := ur.collection().UpdateOne(context.TODO(), filter, update)
+
+	if res.MatchedCount == 0 {
+		return mongo.ErrNoDocuments
+	}
+
+	return err
 }
 
 func (ur *UserRepository) collection() *mongo.Collection {

@@ -5,7 +5,9 @@ import (
 )
 
 type UserCreateOrUpdateRequest struct {
-	Name  string      `json:"name"`
-	Phone string      `json:"phone"`
-	Role  models.Role `json:"role"`
+	Name       string      `json:"name"`
+	Phone      string      `json:"phone"`
+	Role       models.Role `json:"role"`
+	Login      string      `json:"login"`
+	Passphrase string      `json:"passphrase"`
 }

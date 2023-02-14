@@ -1,10 +1,13 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/online.scheduling-api/constants"
 	dtoRequest "github.com/online.scheduling-api/src/api/dtos/requests"
 	dtoResponse "github.com/online.scheduling-api/src/api/dtos/responses"
 	validator "github.com/online.scheduling-api/src/api/dtos/validators"
@@ -21,8 +24,20 @@ type UsersHandler struct {
 func (uc *UsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 	filter := models.UserFilter{}
 
+	token, err := helpers.RetrieveToken(r)
+	if err != nil {
+		helpers.JSONResponseError(w, http.StatusUnauthorized, errors.New("missing auth"))
+	}
+
+	claims := token.Claims.(jwt.MapClaims)
+	isCustomer := claims[constants.CLAIM_USER_ROLE].(float64) == float64(models.Customer)
+
+	if isCustomer {
+		filter.UserId, _ = uuid.Parse(claims[constants.CLAIM_USER_ID].(string))
+	}
+
 	if name := r.URL.Query().Get("name"); name != "" {
-		filter.Name = name
+		filter.UserName = name
 	}
 
 	if modality := r.URL.Query().Get("modality"); modality != "" {
@@ -80,19 +95,31 @@ func (uc *UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u := models.MapUserFrom(
+	authData := dtoRequest.MapAuthRequestFrom(&requestData)
+	if err := validator.ValidateAuth(authData); err != nil {
+		helpers.JSONResponseError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	u := models.MapNewUserFrom(
 		requestData.Name,
+		requestData.Login,
+		requestData.Passphrase,
 		requestData.Phone,
 		requestData.Role,
 		false)
 
-	responseCode := uc.UserService.CreateNewUser(&u)
+	responseCode, token := uc.UserService.CreateNewUser(&u)
+
 	if responseCode != shared.Success {
 		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)
 		return
 	}
 
-	helpers.JSONResponse(w, http.StatusCreated, dtoResponse.MapUserResponseFrom(&u))
+	helpers.JSONResponse(
+		w,
+		http.StatusCreated,
+		dtoResponse.MapNewUserResponseFrom(&u, token))
 }
 
 func (uc *UsersHandler) Activate(w http.ResponseWriter, r *http.Request) {
@@ -114,7 +141,7 @@ func (uc *UsersHandler) Activate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	helpers.JSONResponse(w, http.StatusNoContent, nil)
+	helpers.JSONResponse(w, http.StatusOK, nil)
 }
 
 func (uc *UsersHandler) Edit(w http.ResponseWriter, r *http.Request) {
@@ -147,6 +174,29 @@ func (uc *UsersHandler) Edit(w http.ResponseWriter, r *http.Request) {
 		helpers.JSONResponseError(w, http.StatusNotFound, nil)
 		return
 	}
+
+	if responseCode != shared.Success {
+		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)
+		return
+	}
+
+	helpers.JSONResponse(w, http.StatusNoContent, nil)
+}
+
+func (h *UsersHandler) EditModalities(w http.ResponseWriter, r *http.Request) {
+	userId, err := uuid.Parse(mux.Vars(r)["id"])
+	if err != nil {
+		helpers.JSONResponseError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	var requestData dtoRequest.UserModalitiesRequest
+	if err := helpers.ReadJSONBody(r, &requestData); err != nil {
+		helpers.JSONResponseError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	responseCode := h.UserService.EditModalities(&userId, requestData.Modalities)
 
 	if responseCode != shared.Success {
 		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)

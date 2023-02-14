@@ -12,7 +12,8 @@ type UserCreateOrUpdateResponse struct {
 	RoleCode        models.Role       `json:"role-code"`
 	RoleDescription string            `json:"role-description"`
 	IsActive        bool              `json:"isActive"`
-	Modalities      []models.Modality `json:"modalities"`
+	Modalities      []models.Modality `json:"modalities,omitempty"`
+	Token           string            `json:"token,omitempty"`
 }
 
 func MapUserResponseFrom(u *models.User) UserCreateOrUpdateResponse {
@@ -30,5 +31,17 @@ func MapUserResponseFrom(u *models.User) UserCreateOrUpdateResponse {
 		RoleCode:        u.Role,
 		RoleDescription: u.Role.GetDescription(),
 		Modalities:      modalities,
+	}
+}
+
+func MapNewUserResponseFrom(u *models.User, token string) UserCreateOrUpdateResponse {
+	return UserCreateOrUpdateResponse{
+		Id:              u.Id,
+		Name:            u.Name,
+		Phone:           u.Phone,
+		IsActive:        u.IsActive,
+		RoleCode:        u.Role,
+		RoleDescription: u.Role.GetDescription(),
+		Token:           token,
 	}
 }

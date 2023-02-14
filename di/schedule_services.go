@@ -1,6 +1,7 @@
-package ioc
+package di
 
 import (
+	"github.com/online.scheduling-api/constants"
 	api "github.com/online.scheduling-api/src/api/handlers"
 	"github.com/online.scheduling-api/src/infra/repository"
 	"github.com/online.scheduling-api/src/services"
@@ -11,31 +12,31 @@ import (
 func GetSchedulingServices() []di.Def {
 	return []di.Def{
 		{
-			Name:  "schedule-repository",
+			Name:  constants.SCHEDULE_REPOSITORY,
 			Scope: di.Request,
 			Build: func(ctn di.Container) (interface{}, error) {
 				return &repository.ScheduleRepository{
-					Client: ctn.Get("mongo").(*mongo.Client),
+					Client: ctn.Get(constants.DB_SERVICE).(*mongo.Client),
 				}, nil
 			},
 		},
 		{
-			Name:  "schedule-service",
+			Name:  constants.SCHEDULE_SERVICE,
 			Scope: di.Request,
 			Build: func(ctn di.Container) (interface{}, error) {
 				return &services.ScheduleService{
-					ScheduleRepository: ctn.Get("schedule-repository").(*repository.ScheduleRepository),
-					UserRespository:    ctn.Get("user-repository").(*repository.UserRepository),
-					ModalityRepository: ctn.Get("modality-repository").(*repository.ModalityRepository),
+					ScheduleRepository: ctn.Get(constants.SCHEDULE_REPOSITORY).(*repository.ScheduleRepository),
+					UserRespository:    ctn.Get(constants.USER_REPOSITORY).(*repository.UserRepository),
+					ModalityRepository: ctn.Get(constants.MODALITY_REPOSITORY).(*repository.ModalityRepository),
 				}, nil
 			},
 		},
 		{
-			Name:  "schedule-handler",
+			Name:  constants.SCHEDULE_HANDLER,
 			Scope: di.Request,
 			Build: func(ctn di.Container) (interface{}, error) {
 				return &api.SchedulesHandler{
-					ScheduleService: ctn.Get("schedule-service").(*services.ScheduleService),
+					ScheduleService: ctn.Get(constants.SCHEDULE_SERVICE).(*services.ScheduleService),
 				}, nil
 			},
 		},
