@@ -49,6 +49,21 @@ func (mr *MockIUserRepositoryMockRecorder) ActivateUser(uuid interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ActivateUser", reflect.TypeOf((*MockIUserRepository)(nil).ActivateUser), uuid)
 }
 
+// Authenticate mocks base method.
+func (m *MockIUserRepository) Authenticate(login, passphrase string) (bool, *models.User) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Authenticate", login, passphrase)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(*models.User)
+	return ret0, ret1
+}
+
+// Authenticate indicates an expected call of Authenticate.
+func (mr *MockIUserRepositoryMockRecorder) Authenticate(login, passphrase interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Authenticate", reflect.TypeOf((*MockIUserRepository)(nil).Authenticate), login, passphrase)
+}
+
 // CreateNewUser mocks base method.
 func (m *MockIUserRepository) CreateNewUser(u *models.User) error {
 	m.ctrl.T.Helper()
@@ -76,6 +91,20 @@ func (m *MockIUserRepository) DeleteUserById(uuid *uuid.UUID) (bool, error) {
 func (mr *MockIUserRepositoryMockRecorder) DeleteUserById(uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUserById", reflect.TypeOf((*MockIUserRepository)(nil).DeleteUserById), uuid)
+}
+
+// EditAuth mocks base method.
+func (m *MockIUserRepository) EditAuth(uuid *uuid.UUID, login, passphrase string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EditAuth", uuid, login, passphrase)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// EditAuth indicates an expected call of EditAuth.
+func (mr *MockIUserRepositoryMockRecorder) EditAuth(uuid, login, passphrase interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EditAuth", reflect.TypeOf((*MockIUserRepository)(nil).EditAuth), uuid, login, passphrase)
 }
 
 // EditUser mocks base method.
@@ -106,19 +135,19 @@ func (mr *MockIUserRepositoryMockRecorder) EditUserModalities(uuid, u interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EditUserModalities", reflect.TypeOf((*MockIUserRepository)(nil).EditUserModalities), uuid, u)
 }
 
-// ExistsByPhone mocks base method.
-func (m *MockIUserRepository) ExistsByPhone(uuid *uuid.UUID, phone *string) (bool, error) {
+// ExistsBy mocks base method.
+func (m *MockIUserRepository) ExistsBy(uuid *uuid.UUID, phone, login *string) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExistsByPhone", uuid, phone)
+	ret := m.ctrl.Call(m, "ExistsBy", uuid, phone, login)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ExistsByPhone indicates an expected call of ExistsByPhone.
-func (mr *MockIUserRepositoryMockRecorder) ExistsByPhone(uuid, phone interface{}) *gomock.Call {
+// ExistsBy indicates an expected call of ExistsBy.
+func (mr *MockIUserRepositoryMockRecorder) ExistsBy(uuid, phone, login interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsByPhone", reflect.TypeOf((*MockIUserRepository)(nil).ExistsByPhone), uuid, phone)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsBy", reflect.TypeOf((*MockIUserRepository)(nil).ExistsBy), uuid, phone, login)
 }
 
 // Get mocks base method.
