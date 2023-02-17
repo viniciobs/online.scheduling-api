@@ -10,24 +10,19 @@ import (
 
 func TestShouldMapModalitySuccessfully(t *testing.T) {
 	// Arrange
-	id := uuid.New()
-
-	const Name = "Manicure"
-	const Description = "Corte, pintura e unhas de gel"
-
 	m := models.Modality{
-		Id:          id,
-		Name:        Name,
-		Description: Description,
+		Id:          uuid.New(),
+		Name:        "Manicure",
+		Description: "Corte, pintura e unhas de gel",
 	}
 
 	// Act
 	result := api.MapModalityResponseFrom(&m)
 
 	// Assert
-	if result.Id != id ||
-		result.Name != Name ||
-		result.Description != Description {
+	if result.Id != m.Id ||
+		result.Name != m.Name ||
+		result.Description != m.Description {
 		t.Error("Expected equivalent object but got different properties values")
 	}
 }
