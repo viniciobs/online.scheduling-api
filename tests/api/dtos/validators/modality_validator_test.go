@@ -23,7 +23,7 @@ func TestShouldReturnErrorWhenModalityNameIsEmptyString(t *testing.T) {
 	}
 }
 
-func TestShouldReturnErrorWhenDescriptionLengthIsHigherThan(t *testing.T) {
+func TestShouldReturnErrorWhenDescriptionLengthIsHigherThan140(t *testing.T) {
 	// Arrange
 	m := dto.ModalityCreateOrUpdateRequest{
 		Name:        "Test",
