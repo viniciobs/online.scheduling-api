@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/online.scheduling-api/src/helpers"
+	"github.com/online.scheduling-api/src/shared"
 )
 
 func TestShouldNotThrowErrorWhenNilError(t *testing.T) {
@@ -65,5 +67,25 @@ func TestShouldNotThrowErrorWhenNilBody(t *testing.T) {
 	// Assert
 	if err != nil {
 		t.Errorf("Expected to not throw errors but got %v", err)
+	}
+}
+
+func TestShouldReturnExpectedStatusCodeFromResponseCode(t *testing.T) {
+	// Arrange
+	errors := map[shared.Code]int{
+		shared.DuplicatedRecord:  http.StatusUnprocessableEntity,
+		shared.InvalidOperation:  http.StatusUnprocessableEntity,
+		shared.NonExistentRecord: http.StatusNotFound,
+		shared.ThirdPartyFail:    http.StatusBadGateway,
+	}
+
+	// Act
+
+	// Assert
+	for responseCode, statusResponse := range errors {
+		result := helpers.GetErrorStatusCodeFrom(responseCode)
+		if result != statusResponse {
+			t.Errorf("Expected %d and got %d", statusResponse, result)
+		}
 	}
 }
