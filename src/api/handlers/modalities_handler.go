@@ -26,7 +26,7 @@ func (h *ModalityHandler) Get(w http.ResponseWriter, r *http.Request) {
 		filter.Name = name
 	}
 
-	modalities, responseCode := h.ModalityService.GetModalities(&filter)
+	modalities, responseCode := h.ModalityService.GetModalities(r.Context(), &filter)
 
 	if responseCode != shared.Success {
 		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)
@@ -49,7 +49,7 @@ func (h *ModalityHandler) GetById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	modality, responseCode := h.ModalityService.GetModalityById(&id)
+	modality, responseCode := h.ModalityService.GetModalityById(r.Context(), &id)
 
 	if responseCode == shared.NonExistentRecord {
 		helpers.JSONResponseError(w, http.StatusNotFound, nil)
@@ -81,7 +81,7 @@ func (h *ModalityHandler) Create(w http.ResponseWriter, r *http.Request) {
 		requestData.Name,
 		requestData.Description)
 
-	responseCode := h.ModalityService.CreateNewModality(&m)
+	responseCode := h.ModalityService.CreateNewModality(r.Context(), &m)
 	if responseCode != shared.Success {
 		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)
 		return
@@ -97,7 +97,7 @@ func (h *ModalityHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseCode := h.ModalityService.DeleteModalityById(&id)
+	responseCode := h.ModalityService.DeleteModalityById(r.Context(), &id)
 
 	if responseCode == shared.NonExistentRecord {
 		helpers.JSONResponseError(w, http.StatusNotFound, nil)
@@ -134,7 +134,7 @@ func (h *ModalityHandler) Edit(w http.ResponseWriter, r *http.Request) {
 		requestData.Name,
 		requestData.Description)
 
-	responseCode := h.ModalityService.EditModality(&id, &m)
+	responseCode := h.ModalityService.EditModality(r.Context(), &id, &m)
 
 	if responseCode == shared.NonExistentRecord {
 		helpers.JSONResponseError(w, http.StatusNotFound, nil)

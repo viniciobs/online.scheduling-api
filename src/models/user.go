@@ -24,6 +24,7 @@ func MapNewUserFrom(name, login, passphrase, phone string, role Role, active boo
 		Phone:      phone,
 		Role:       role,
 		IsActive:   active,
+		Modalities: []Modality{},
 	}
 }
 

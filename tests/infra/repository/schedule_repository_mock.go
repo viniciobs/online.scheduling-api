@@ -5,6 +5,7 @@
 package mock_repository
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -36,59 +37,59 @@ func (m *MockIScheduleRepository) EXPECT() *MockIScheduleRepositoryMockRecorder 
 }
 
 // Create mocks base method.
-func (m *MockIScheduleRepository) Create(arg0 *models.Schedule) error {
+func (m *MockIScheduleRepository) Create(ctx context.Context, schedule *models.Schedule) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", arg0)
+	ret := m.ctrl.Call(m, "Create", ctx, schedule)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockIScheduleRepositoryMockRecorder) Create(arg0 interface{}) *gomock.Call {
+func (mr *MockIScheduleRepositoryMockRecorder) Create(ctx, schedule interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockIScheduleRepository)(nil).Create), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockIScheduleRepository)(nil).Create), ctx, schedule)
 }
 
 // DeleteBy mocks base method.
-func (m *MockIScheduleRepository) DeleteBy(userId, modalityId *uuid.UUID) (bool, error) {
+func (m *MockIScheduleRepository) DeleteBy(ctx context.Context, userId, modalityId *uuid.UUID) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteBy", userId, modalityId)
+	ret := m.ctrl.Call(m, "DeleteBy", ctx, userId, modalityId)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // DeleteBy indicates an expected call of DeleteBy.
-func (mr *MockIScheduleRepositoryMockRecorder) DeleteBy(userId, modalityId interface{}) *gomock.Call {
+func (mr *MockIScheduleRepositoryMockRecorder) DeleteBy(ctx, userId, modalityId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBy", reflect.TypeOf((*MockIScheduleRepository)(nil).DeleteBy), userId, modalityId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBy", reflect.TypeOf((*MockIScheduleRepository)(nil).DeleteBy), ctx, userId, modalityId)
 }
 
 // Edit mocks base method.
-func (m *MockIScheduleRepository) Edit(arg0 *models.Schedule) error {
+func (m *MockIScheduleRepository) Edit(ctx context.Context, schedule *models.Schedule) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Edit", arg0)
+	ret := m.ctrl.Call(m, "Edit", ctx, schedule)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Edit indicates an expected call of Edit.
-func (mr *MockIScheduleRepositoryMockRecorder) Edit(arg0 interface{}) *gomock.Call {
+func (mr *MockIScheduleRepositoryMockRecorder) Edit(ctx, schedule interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Edit", reflect.TypeOf((*MockIScheduleRepository)(nil).Edit), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Edit", reflect.TypeOf((*MockIScheduleRepository)(nil).Edit), ctx, schedule)
 }
 
 // Get mocks base method.
-func (m *MockIScheduleRepository) Get(arg0 *models.ScheduleFilter) ([]*models.Schedule, error) {
+func (m *MockIScheduleRepository) Get(ctx context.Context, filter *models.ScheduleFilter) ([]*models.Schedule, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", arg0)
+	ret := m.ctrl.Call(m, "Get", ctx, filter)
 	ret0, _ := ret[0].([]*models.Schedule)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockIScheduleRepositoryMockRecorder) Get(arg0 interface{}) *gomock.Call {
+func (mr *MockIScheduleRepositoryMockRecorder) Get(ctx, filter interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockIScheduleRepository)(nil).Get), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockIScheduleRepository)(nil).Get), ctx, filter)
 }

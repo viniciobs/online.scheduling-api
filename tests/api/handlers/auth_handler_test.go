@@ -2,6 +2,7 @@ package tests
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -10,6 +11,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	api "github.com/online.scheduling-api/src/api/handlers"
+	"github.com/online.scheduling-api/src/helpers"
 	"github.com/online.scheduling-api/src/models"
 	mock_repository "github.com/online.scheduling-api/tests/infra/repository"
 )
@@ -41,9 +43,11 @@ func TestShouldReturnUnauthorizedWhenInvalidCredentialsPassed(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	ctx := context.Background()
+
 	repo := mock_repository.NewMockIUserRepository(mockCtrl)
 	repo.EXPECT().
-		Authenticate("login_test", "passphrase_test").
+		Authenticate(ctx, "login_test", helpers.Crypt("passphrase_test")).
 		Return(false, nil)
 
 	ah := api.AuthHandler{UserRepository: repo}
@@ -69,6 +73,8 @@ func TestShouldReturnSuccessWhenValidCredentialsPassed(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	ctx := context.Background()
+
 	u := &models.User{
 		Id:         uuid.New(),
 		Name:       "test",
@@ -78,7 +84,7 @@ func TestShouldReturnSuccessWhenValidCredentialsPassed(t *testing.T) {
 
 	repo := mock_repository.NewMockIUserRepository(mockCtrl)
 	repo.EXPECT().
-		Authenticate("login_test", "passphrase_test").
+		Authenticate(ctx, "login_test", helpers.Crypt("passphrase_test")).
 		Return(true, u)
 
 	ah := api.AuthHandler{UserRepository: repo}

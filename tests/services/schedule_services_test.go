@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"context"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -16,12 +17,14 @@ func TestShouldReturnDuplicatedRecordWhenScheduleExists(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	ctx := context.Background()
+
 	userId := uuid.New()
 	modalityId := uuid.New()
 
 	repo := mock_repository.NewMockIScheduleRepository(mockCtrl)
 	repo.EXPECT().
-		Get(gomock.Any()).
+		Get(ctx, gomock.Any()).
 		Return([]*models.Schedule{{UserId: userId, ModalityId: modalityId}}, nil)
 
 	service := services.ScheduleService{
@@ -29,7 +32,7 @@ func TestShouldReturnDuplicatedRecordWhenScheduleExists(t *testing.T) {
 	}
 
 	// Act
-	responseCode := service.Create(&userId, &modalityId, nil)
+	responseCode := service.Create(ctx, &userId, &modalityId, nil)
 
 	// Assert
 	if responseCode != shared.DuplicatedRecord {
@@ -42,17 +45,19 @@ func TestShouldReturnNonExistentRecordWhenGivenModalityDoesNotExists(t *testing.
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	ctx := context.Background()
+
 	userId := uuid.New()
 	modalityId := uuid.New()
 
 	repo := mock_repository.NewMockIScheduleRepository(mockCtrl)
 	repo.EXPECT().
-		Get(gomock.Any()).
+		Get(ctx, gomock.Any()).
 		Return([]*models.Schedule{}, nil)
 
 	modalityRepo := mock_repository.NewMockIModalityRepository(mockCtrl)
 	modalityRepo.EXPECT().
-		GetModalityById(&modalityId).
+		GetModalityById(ctx, &modalityId).
 		Return(nil, nil)
 
 	service := services.ScheduleService{
@@ -61,7 +66,7 @@ func TestShouldReturnNonExistentRecordWhenGivenModalityDoesNotExists(t *testing.
 	}
 
 	// Act
-	responseCode := service.Create(&userId, &modalityId, nil)
+	responseCode := service.Create(ctx, &userId, &modalityId, nil)
 
 	// Assert
 	if responseCode != shared.NonExistentRecord {
@@ -77,19 +82,21 @@ func TestShouldReturnNonExistentRecordWhenGivenUserDoesNotExists(t *testing.T) {
 	userId := uuid.New()
 	modalityId := uuid.New()
 
+	ctx := context.Background()
+
 	repo := mock_repository.NewMockIScheduleRepository(mockCtrl)
 	repo.EXPECT().
-		Get(gomock.Any()).
+		Get(ctx, gomock.Any()).
 		Return([]*models.Schedule{}, nil)
 
 	modalityRepo := mock_repository.NewMockIModalityRepository(mockCtrl)
 	modalityRepo.EXPECT().
-		GetModalityById(&modalityId).
+		GetModalityById(ctx, &modalityId).
 		Return(&models.Modality{Id: modalityId}, nil)
 
 	userRepo := mock_repository.NewMockIUserRepository(mockCtrl)
 	userRepo.EXPECT().
-		GetUserById(&userId).
+		GetUserById(ctx, &userId).
 		Return(nil, nil)
 
 	service := services.ScheduleService{
@@ -99,7 +106,7 @@ func TestShouldReturnNonExistentRecordWhenGivenUserDoesNotExists(t *testing.T) {
 	}
 
 	// Act
-	responseCode := service.Create(&userId, &modalityId, nil)
+	responseCode := service.Create(ctx, &userId, &modalityId, nil)
 
 	// Assert
 	if responseCode != shared.NonExistentRecord {
@@ -115,19 +122,21 @@ func TestShouldReturnInvalidOperationWhenGivenUserDoesNotWorkWithGivenModality(t
 	userId := uuid.New()
 	modalityId := uuid.New()
 
+	ctx := context.Background()
+
 	repo := mock_repository.NewMockIScheduleRepository(mockCtrl)
 	repo.EXPECT().
-		Get(gomock.Any()).
+		Get(ctx, gomock.Any()).
 		Return([]*models.Schedule{}, nil)
 
 	modalityRepo := mock_repository.NewMockIModalityRepository(mockCtrl)
 	modalityRepo.EXPECT().
-		GetModalityById(&modalityId).
+		GetModalityById(ctx, &modalityId).
 		Return(&models.Modality{Id: modalityId}, nil)
 
 	userRepo := mock_repository.NewMockIUserRepository(mockCtrl)
 	userRepo.EXPECT().
-		GetUserById(&userId).
+		GetUserById(ctx, &userId).
 		Return(
 			&models.User{
 				Id:         userId,
@@ -142,7 +151,7 @@ func TestShouldReturnInvalidOperationWhenGivenUserDoesNotWorkWithGivenModality(t
 	}
 
 	// Act
-	responseCode := service.Create(&userId, &modalityId, nil)
+	responseCode := service.Create(ctx, &userId, &modalityId, nil)
 
 	// Assert
 	if responseCode != shared.InvalidOperation {

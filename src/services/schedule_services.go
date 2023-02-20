@@ -1,6 +1,8 @@
 package services
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 	"github.com/online.scheduling-api/src/infra/repository"
 	infraService "github.com/online.scheduling-api/src/infra/services"
@@ -9,10 +11,10 @@ import (
 )
 
 type IScheduleService interface {
-	Get(*models.ScheduleFilter) ([]*models.Schedule, shared.Code)
-	Create(user, modality *uuid.UUID, availability []*models.Availability) shared.Code
-	Edit(user, modality *uuid.UUID, availability []*models.Availability) shared.Code
-	DeleteBy(userId, modalityId *uuid.UUID) shared.Code
+	Get(ctx context.Context, filter *models.ScheduleFilter) ([]*models.Schedule, shared.Code)
+	Create(ctx context.Context, user, modality *uuid.UUID, availability []*models.Availability) shared.Code
+	Edit(ctx context.Context, user, modality *uuid.UUID, availability []*models.Availability) shared.Code
+	DeleteBy(ctx context.Context, userId, modalityId *uuid.UUID) shared.Code
 }
 
 type ScheduleService struct {
@@ -21,8 +23,8 @@ type ScheduleService struct {
 	UserRespository    repository.IUserRepository
 }
 
-func (s *ScheduleService) Get(filter *models.ScheduleFilter) ([]*models.Schedule, shared.Code) {
-	result, err := s.ScheduleRepository.Get(filter)
+func (s *ScheduleService) Get(ctx context.Context, filter *models.ScheduleFilter) ([]*models.Schedule, shared.Code) {
+	result, err := s.ScheduleRepository.Get(ctx, filter)
 
 	if err != nil {
 		return result, infraService.MapErrorFrom(err)
@@ -31,8 +33,8 @@ func (s *ScheduleService) Get(filter *models.ScheduleFilter) ([]*models.Schedule
 	return result, shared.Success
 }
 
-func (s *ScheduleService) Create(userId, modalityId *uuid.UUID, availability []*models.Availability) shared.Code {
-	exists, err := s.exists(userId, modalityId)
+func (s *ScheduleService) Create(ctx context.Context, userId, modalityId *uuid.UUID, availability []*models.Availability) shared.Code {
+	exists, err := s.exists(ctx, userId, modalityId)
 
 	if err != nil {
 		return infraService.MapErrorFrom(err)
@@ -42,7 +44,7 @@ func (s *ScheduleService) Create(userId, modalityId *uuid.UUID, availability []*
 		return shared.DuplicatedRecord
 	}
 
-	modality, err := s.ModalityRepository.GetModalityById(modalityId)
+	modality, err := s.ModalityRepository.GetModalityById(ctx, modalityId)
 
 	if err != nil {
 		return infraService.MapErrorFrom(err)
@@ -52,7 +54,7 @@ func (s *ScheduleService) Create(userId, modalityId *uuid.UUID, availability []*
 		return shared.NonExistentRecord
 	}
 
-	user, err := s.UserRespository.GetUserById(userId)
+	user, err := s.UserRespository.GetUserById(ctx, userId)
 
 	if err != nil {
 		return infraService.MapErrorFrom(err)
@@ -74,15 +76,15 @@ func (s *ScheduleService) Create(userId, modalityId *uuid.UUID, availability []*
 		Availability: availability,
 	}
 
-	if err := s.ScheduleRepository.Create(&schedule); err != nil {
+	if err := s.ScheduleRepository.Create(ctx, &schedule); err != nil {
 		return infraService.MapErrorFrom(err)
 	}
 
 	return shared.Success
 }
 
-func (s *ScheduleService) Edit(userId, modalityId *uuid.UUID, availability []*models.Availability) shared.Code {
-	exists, err := s.exists(userId, modalityId)
+func (s *ScheduleService) Edit(ctx context.Context, userId, modalityId *uuid.UUID, availability []*models.Availability) shared.Code {
+	exists, err := s.exists(ctx, userId, modalityId)
 
 	if err != nil {
 		return infraService.MapErrorFrom(err)
@@ -92,10 +94,12 @@ func (s *ScheduleService) Edit(userId, modalityId *uuid.UUID, availability []*mo
 		return shared.NonExistentRecord
 	}
 
-	schedules, err := s.ScheduleRepository.Get(&models.ScheduleFilter{
-		ModalityId: *modalityId,
-		UserId:     *userId,
-	})
+	schedules, err := s.ScheduleRepository.Get(
+		ctx,
+		&models.ScheduleFilter{
+			ModalityId: *modalityId,
+			UserId:     *userId,
+		})
 
 	if err != nil {
 		return infraService.MapErrorFrom(err)
@@ -112,15 +116,15 @@ func (s *ScheduleService) Edit(userId, modalityId *uuid.UUID, availability []*mo
 	schedule := schedules[0]
 	schedule.Availability = availability
 
-	if err := s.ScheduleRepository.Edit(schedule); err != nil {
+	if err := s.ScheduleRepository.Edit(ctx, schedule); err != nil {
 		return infraService.MapErrorFrom(err)
 	}
 
 	return shared.Success
 }
 
-func (s *ScheduleService) DeleteBy(userId, modalityId *uuid.UUID) shared.Code {
-	isFound, err := s.ScheduleRepository.DeleteBy(userId, modalityId)
+func (s *ScheduleService) DeleteBy(ctx context.Context, userId, modalityId *uuid.UUID) shared.Code {
+	isFound, err := s.ScheduleRepository.DeleteBy(ctx, userId, modalityId)
 
 	if err != nil {
 		return infraService.MapErrorFrom(err)
@@ -133,13 +137,13 @@ func (s *ScheduleService) DeleteBy(userId, modalityId *uuid.UUID) shared.Code {
 	return shared.Success
 }
 
-func (s *ScheduleService) exists(user, schedule *uuid.UUID) (bool, error) {
+func (s *ScheduleService) exists(ctx context.Context, user, schedule *uuid.UUID) (bool, error) {
 	filter := models.ScheduleFilter{
 		UserId:     *user,
 		ModalityId: *schedule,
 	}
 
-	schedules, err := s.ScheduleRepository.Get(&filter)
+	schedules, err := s.ScheduleRepository.Get(ctx, &filter)
 
 	if err != nil {
 		return false, err

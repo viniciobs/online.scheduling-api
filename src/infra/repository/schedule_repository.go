@@ -12,17 +12,17 @@ import (
 )
 
 type IScheduleRepository interface {
-	Get(*models.ScheduleFilter) ([]*models.Schedule, error)
-	Create(*models.Schedule) error
-	Edit(*models.Schedule) error
-	DeleteBy(userId, modalityId *uuid.UUID) (isFound bool, err error)
+	Get(ctx context.Context, filter *models.ScheduleFilter) ([]*models.Schedule, error)
+	Create(ctx context.Context, schedule *models.Schedule) error
+	Edit(ctx context.Context, schedule *models.Schedule) error
+	DeleteBy(ctx context.Context, userId, modalityId *uuid.UUID) (isFound bool, err error)
 }
 
 type ScheduleRepository struct {
 	DB *data.DB
 }
 
-func (sr *ScheduleRepository) Get(filter *models.ScheduleFilter) ([]*models.Schedule, error) {
+func (sr *ScheduleRepository) Get(ctx context.Context, filter *models.ScheduleFilter) ([]*models.Schedule, error) {
 	query := bson.M{}
 
 	if filter.ModalityId != uuid.Nil {
@@ -49,14 +49,14 @@ func (sr *ScheduleRepository) Get(filter *models.ScheduleFilter) ([]*models.Sche
 		query["availability.reserved-to"] = filter.ReservedTo
 	}
 
-	cursor, err := sr.collection().Find(context.TODO(), query)
+	cursor, err := sr.collection().Find(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
 	result := []*models.Schedule{}
 
-	for cursor.Next(context.TODO()) {
+	for cursor.Next(ctx) {
 		var schedule models.Schedule
 		cursor.Decode(&schedule)
 
@@ -66,13 +66,13 @@ func (sr *ScheduleRepository) Get(filter *models.ScheduleFilter) ([]*models.Sche
 	return result, nil
 }
 
-func (sr *ScheduleRepository) Create(schedule *models.Schedule) error {
-	_, err := sr.collection().InsertOne(context.TODO(), schedule)
+func (sr *ScheduleRepository) Create(ctx context.Context, schedule *models.Schedule) error {
+	_, err := sr.collection().InsertOne(ctx, schedule)
 
 	return err
 }
 
-func (sr *ScheduleRepository) Edit(schedule *models.Schedule) error {
+func (sr *ScheduleRepository) Edit(ctx context.Context, schedule *models.Schedule) error {
 	filter := bson.M{
 		"user-id":     &schedule.UserId,
 		"modality-id": &schedule.ModalityId,
@@ -84,7 +84,7 @@ func (sr *ScheduleRepository) Edit(schedule *models.Schedule) error {
 		},
 	}
 
-	res, err := sr.collection().UpdateOne(context.TODO(), filter, update)
+	res, err := sr.collection().UpdateOne(ctx, filter, update)
 
 	if res.MatchedCount == 0 {
 		return mongo.ErrNoDocuments
@@ -93,7 +93,7 @@ func (sr *ScheduleRepository) Edit(schedule *models.Schedule) error {
 	return err
 }
 
-func (sr *ScheduleRepository) DeleteBy(userId, modalityId *uuid.UUID) (isFound bool, err error) {
+func (sr *ScheduleRepository) DeleteBy(ctx context.Context, userId, modalityId *uuid.UUID) (isFound bool, err error) {
 	query := bson.M{}
 
 	if *userId != uuid.Nil {
@@ -104,7 +104,7 @@ func (sr *ScheduleRepository) DeleteBy(userId, modalityId *uuid.UUID) (isFound b
 		query["modality-id"] = modalityId
 	}
 
-	res, err := sr.collection().DeleteOne(context.TODO(), query)
+	res, err := sr.collection().DeleteOne(ctx, query)
 
 	if err != nil {
 		return false, err

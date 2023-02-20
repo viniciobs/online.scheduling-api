@@ -12,23 +12,23 @@ import (
 )
 
 type IUserRepository interface {
-	Get(*models.UserFilter) ([]*models.User, error)
-	GetUserById(uuid *uuid.UUID) (*models.User, error)
-	CreateNewUser(u *models.User) error
-	ActivateUser(uuid *uuid.UUID) error
-	EditUser(uuid *uuid.UUID, u *models.User) error
-	EditUserModalities(uuid *uuid.UUID, u *models.User) error
-	DeleteUserById(uuid *uuid.UUID) (isFound bool, err error)
-	ExistsBy(uuid *uuid.UUID, phone, login *string) (bool, error)
-	Authenticate(login, passphrase string) (bool, *models.User)
-	EditAuth(uuid *uuid.UUID, login, passphrase string) error
+	Get(ctx context.Context, filter *models.UserFilter) ([]*models.User, error)
+	GetUserById(ctx context.Context, uuid *uuid.UUID) (*models.User, error)
+	CreateNewUser(ctx context.Context, u *models.User) error
+	ActivateUser(ctx context.Context, uuid *uuid.UUID) error
+	EditUser(ctx context.Context, uuid *uuid.UUID, u *models.User) error
+	EditUserModalities(ctx context.Context, uuid *uuid.UUID, u *models.User) error
+	DeleteUserById(ctx context.Context, uuid *uuid.UUID) (isFound bool, err error)
+	ExistsBy(ctx context.Context, uuid *uuid.UUID, phone, login *string) (bool, error)
+	Authenticate(ctx context.Context, login, passphrase string) (bool, *models.User)
+	EditAuth(ctx context.Context, uuid *uuid.UUID, login, passphrase string) error
 }
 
 type UserRepository struct {
 	DB *data.DB
 }
 
-func (ur *UserRepository) Get(filter *models.UserFilter) ([]*models.User, error) {
+func (ur *UserRepository) Get(ctx context.Context, filter *models.UserFilter) ([]*models.User, error) {
 	query := bson.M{}
 
 	if filter.UserId != uuid.Nil {
@@ -47,14 +47,14 @@ func (ur *UserRepository) Get(filter *models.UserFilter) ([]*models.User, error)
 		query["modalities.name"] = bson.M{"$regex": filter.ModalityName, "$options": "i"}
 	}
 
-	cursor, err := ur.collection().Find(context.TODO(), query)
+	cursor, err := ur.collection().Find(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
 	users := []*models.User{}
 
-	for cursor.Next(context.TODO()) {
+	for cursor.Next(ctx) {
 		var user models.User
 		cursor.Decode(&user)
 
@@ -64,12 +64,12 @@ func (ur *UserRepository) Get(filter *models.UserFilter) ([]*models.User, error)
 	return users, nil
 }
 
-func (ur *UserRepository) GetUserById(uuid *uuid.UUID) (*models.User, error) {
+func (ur *UserRepository) GetUserById(ctx context.Context, uuid *uuid.UUID) (*models.User, error) {
 	var user *models.User
 
 	err := ur.collection().
 		FindOne(
-			context.TODO(),
+			ctx,
 			&bson.M{"id": uuid}).
 		Decode(&user)
 
@@ -80,13 +80,13 @@ func (ur *UserRepository) GetUserById(uuid *uuid.UUID) (*models.User, error) {
 	return user, err
 }
 
-func (ur *UserRepository) CreateNewUser(u *models.User) error {
-	_, err := ur.collection().InsertOne(context.TODO(), u)
+func (ur *UserRepository) CreateNewUser(ctx context.Context, u *models.User) error {
+	_, err := ur.collection().InsertOne(ctx, u)
 
 	return err
 }
 
-func (ur *UserRepository) ActivateUser(uuid *uuid.UUID) error {
+func (ur *UserRepository) ActivateUser(ctx context.Context, uuid *uuid.UUID) error {
 	filter := bson.M{"id": uuid}
 	update := bson.M{
 		"$set": bson.M{
@@ -94,7 +94,7 @@ func (ur *UserRepository) ActivateUser(uuid *uuid.UUID) error {
 		},
 	}
 
-	res, err := ur.collection().UpdateOne(context.TODO(), filter, update)
+	res, err := ur.collection().UpdateOne(ctx, filter, update)
 
 	if res.MatchedCount == 0 {
 		return mongo.ErrNoDocuments
@@ -103,7 +103,7 @@ func (ur *UserRepository) ActivateUser(uuid *uuid.UUID) error {
 	return err
 }
 
-func (ur *UserRepository) EditUserModalities(uuid *uuid.UUID, u *models.User) error {
+func (ur *UserRepository) EditUserModalities(ctx context.Context, uuid *uuid.UUID, u *models.User) error {
 	filter := bson.M{"id": uuid}
 	update := bson.M{
 		"$set": bson.M{
@@ -111,7 +111,7 @@ func (ur *UserRepository) EditUserModalities(uuid *uuid.UUID, u *models.User) er
 		},
 	}
 
-	res, err := ur.collection().UpdateOne(context.TODO(), filter, update)
+	res, err := ur.collection().UpdateOne(ctx, filter, update)
 
 	if res.MatchedCount == 0 {
 		return mongo.ErrNoDocuments
@@ -120,7 +120,7 @@ func (ur *UserRepository) EditUserModalities(uuid *uuid.UUID, u *models.User) er
 	return err
 }
 
-func (ur *UserRepository) EditUser(uuid *uuid.UUID, u *models.User) error {
+func (ur *UserRepository) EditUser(ctx context.Context, uuid *uuid.UUID, u *models.User) error {
 	filter := bson.M{"id": uuid}
 	update := bson.M{
 		"$set": bson.M{
@@ -130,7 +130,7 @@ func (ur *UserRepository) EditUser(uuid *uuid.UUID, u *models.User) error {
 		},
 	}
 
-	res, err := ur.collection().UpdateOne(context.TODO(), filter, update)
+	res, err := ur.collection().UpdateOne(ctx, filter, update)
 
 	if res.MatchedCount == 0 {
 		return mongo.ErrNoDocuments
@@ -139,10 +139,10 @@ func (ur *UserRepository) EditUser(uuid *uuid.UUID, u *models.User) error {
 	return err
 }
 
-func (ur *UserRepository) DeleteUserById(uuid *uuid.UUID) (isFound bool, err error) {
+func (ur *UserRepository) DeleteUserById(ctx context.Context, uuid *uuid.UUID) (isFound bool, err error) {
 	res, err := ur.collection().
 		DeleteOne(
-			context.TODO(),
+			ctx,
 			&bson.M{"id": uuid})
 
 	if err != nil {
@@ -156,10 +156,10 @@ func (ur *UserRepository) DeleteUserById(uuid *uuid.UUID) (isFound bool, err err
 	return true, nil
 }
 
-func (ur *UserRepository) ExistsBy(uuid *uuid.UUID, phone, login *string) (bool, error) {
+func (ur *UserRepository) ExistsBy(ctx context.Context, uuid *uuid.UUID, phone, login *string) (bool, error) {
 	err := ur.collection().
 		FindOne(
-			context.TODO(),
+			ctx,
 			bson.M{
 				"id": bson.M{"$ne": uuid},
 				"$or": []bson.M{
@@ -176,12 +176,12 @@ func (ur *UserRepository) ExistsBy(uuid *uuid.UUID, phone, login *string) (bool,
 	return err == nil, err
 }
 
-func (ur *UserRepository) Authenticate(login, passphrase string) (bool, *models.User) {
+func (ur *UserRepository) Authenticate(ctx context.Context, login, passphrase string) (bool, *models.User) {
 	var user *models.User
 
 	err := ur.collection().
 		FindOne(
-			context.TODO(),
+			ctx,
 			&bson.M{
 				"login":      login,
 				"passphrase": passphrase,
@@ -190,7 +190,7 @@ func (ur *UserRepository) Authenticate(login, passphrase string) (bool, *models.
 	return err == nil, user
 }
 
-func (ur *UserRepository) EditAuth(uuid *uuid.UUID, login, passphrase string) error {
+func (ur *UserRepository) EditAuth(ctx context.Context, uuid *uuid.UUID, login, passphrase string) error {
 	filter := bson.M{"id": uuid}
 	update := bson.M{
 		"$set": bson.M{
@@ -199,7 +199,7 @@ func (ur *UserRepository) EditAuth(uuid *uuid.UUID, login, passphrase string) er
 		},
 	}
 
-	res, err := ur.collection().UpdateOne(context.TODO(), filter, update)
+	res, err := ur.collection().UpdateOne(ctx, filter, update)
 
 	if res.MatchedCount == 0 {
 		return mongo.ErrNoDocuments

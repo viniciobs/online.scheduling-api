@@ -51,7 +51,7 @@ func (h *SchedulesHandler) Get(w http.ResponseWriter, r *http.Request) {
 		filter.ReservedTo = reservedTo
 	}
 
-	result, responseCode := h.ScheduleService.Get(&filter)
+	result, responseCode := h.ScheduleService.Get(r.Context(), &filter)
 
 	if responseCode != shared.Success {
 		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)
@@ -70,6 +70,7 @@ func (h *SchedulesHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responseCode := h.ScheduleService.Create(
+		r.Context(),
 		&requestData.UserId,
 		&requestData.ModalityId,
 		requestData.Availability,
@@ -97,6 +98,7 @@ func (h *SchedulesHandler) Edit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responseCode := h.ScheduleService.Edit(
+		r.Context(),
 		&requestData.UserId,
 		&requestData.ModalityId,
 		requestData.Availability,
@@ -128,7 +130,7 @@ func (h *SchedulesHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseCode := h.ScheduleService.DeleteBy(requestData.UserId, requestData.ModalityId)
+	responseCode := h.ScheduleService.DeleteBy(r.Context(), requestData.UserId, requestData.ModalityId)
 
 	if responseCode == shared.NonExistentRecord {
 		helpers.JSONResponseError(w, http.StatusNotFound, nil)

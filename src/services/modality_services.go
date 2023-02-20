@@ -14,11 +14,11 @@ import (
 )
 
 type IModalityService interface {
-	GetModalities(filter *models.ModalityFilter) ([]models.Modality, shared.Code)
-	GetModalityById(uuid *uuid.UUID) (*models.Modality, shared.Code)
-	CreateNewModality(m *models.Modality) shared.Code
-	EditModality(uuid *uuid.UUID, m *models.Modality) shared.Code
-	DeleteModalityById(uuid *uuid.UUID) shared.Code
+	GetModalities(ctx context.Context, filter *models.ModalityFilter) ([]models.Modality, shared.Code)
+	GetModalityById(ctx context.Context, uuid *uuid.UUID) (*models.Modality, shared.Code)
+	CreateNewModality(ctx context.Context, m *models.Modality) shared.Code
+	EditModality(ctx context.Context, uuid *uuid.UUID, m *models.Modality) shared.Code
+	DeleteModalityById(ctx context.Context, uuid *uuid.UUID) shared.Code
 }
 
 type ModalityService struct {
@@ -26,8 +26,8 @@ type ModalityService struct {
 	UserRepository     repository.IUserRepository
 }
 
-func (ms *ModalityService) GetModalities(filter *models.ModalityFilter) ([]models.Modality, shared.Code) {
-	result, err := ms.ModalityRepository.GetModalities(filter)
+func (ms *ModalityService) GetModalities(ctx context.Context, filter *models.ModalityFilter) ([]models.Modality, shared.Code) {
+	result, err := ms.ModalityRepository.GetModalities(ctx, filter)
 
 	if err != nil {
 		return result, infraService.MapErrorFrom(err)
@@ -36,8 +36,8 @@ func (ms *ModalityService) GetModalities(filter *models.ModalityFilter) ([]model
 	return result, shared.Success
 }
 
-func (ms *ModalityService) GetModalityById(uuid *uuid.UUID) (*models.Modality, shared.Code) {
-	result, err := ms.ModalityRepository.GetModalityById(uuid)
+func (ms *ModalityService) GetModalityById(ctx context.Context, uuid *uuid.UUID) (*models.Modality, shared.Code) {
+	result, err := ms.ModalityRepository.GetModalityById(ctx, uuid)
 	if err != nil {
 		return nil, infraService.MapErrorFrom(err)
 	}
@@ -49,8 +49,8 @@ func (ms *ModalityService) GetModalityById(uuid *uuid.UUID) (*models.Modality, s
 	return result, shared.Success
 }
 
-func (ms *ModalityService) CreateNewModality(m *models.Modality) shared.Code {
-	exists, err := ms.ModalityRepository.ExistsByName(&m.Id, &m.Name)
+func (ms *ModalityService) CreateNewModality(ctx context.Context, m *models.Modality) shared.Code {
+	exists, err := ms.ModalityRepository.ExistsByName(ctx, &m.Id, &m.Name)
 	if exists {
 		return shared.DuplicatedRecord
 	}
@@ -59,7 +59,7 @@ func (ms *ModalityService) CreateNewModality(m *models.Modality) shared.Code {
 		return infraService.MapErrorFrom(err)
 	}
 
-	err = ms.ModalityRepository.CreateNewModality(m)
+	err = ms.ModalityRepository.CreateNewModality(ctx, m)
 	if err != nil {
 		return infraService.MapErrorFrom(err)
 	}
@@ -67,12 +67,12 @@ func (ms *ModalityService) CreateNewModality(m *models.Modality) shared.Code {
 	return shared.Success
 }
 
-func (ms *ModalityService) EditModality(uuid *uuid.UUID, m *models.Modality) shared.Code {
-	if ms.isInUse(uuid) {
+func (ms *ModalityService) EditModality(ctx context.Context, uuid *uuid.UUID, m *models.Modality) shared.Code {
+	if ms.isInUse(ctx, uuid) {
 		return shared.InvalidOperation
 	}
 
-	exists, err := ms.ModalityRepository.ExistsByName(uuid, &m.Name)
+	exists, err := ms.ModalityRepository.ExistsByName(ctx, uuid, &m.Name)
 	if exists {
 		return shared.DuplicatedRecord
 	}
@@ -81,7 +81,7 @@ func (ms *ModalityService) EditModality(uuid *uuid.UUID, m *models.Modality) sha
 		return infraService.MapErrorFrom(err)
 	}
 
-	err = ms.ModalityRepository.EditModality(uuid, m)
+	err = ms.ModalityRepository.EditModality(ctx, uuid, m)
 	if err != nil {
 		return infraService.MapErrorFrom(err)
 	}
@@ -89,12 +89,12 @@ func (ms *ModalityService) EditModality(uuid *uuid.UUID, m *models.Modality) sha
 	return shared.Success
 }
 
-func (ms *ModalityService) DeleteModalityById(uuid *uuid.UUID) shared.Code {
-	if ms.isInUse(uuid) {
+func (ms *ModalityService) DeleteModalityById(ctx context.Context, uuid *uuid.UUID) shared.Code {
+	if ms.isInUse(ctx, uuid) {
 		return shared.InvalidOperation
 	}
 
-	isFound, err := ms.ModalityRepository.DeleteModalityById(uuid)
+	isFound, err := ms.ModalityRepository.DeleteModalityById(ctx, uuid)
 
 	if err != nil {
 		return infraService.MapErrorFrom(err)
@@ -115,8 +115,9 @@ func (ms *ModalityService) DeleteModalityById(uuid *uuid.UUID) shared.Code {
 	return shared.Success
 }
 
-func (ms *ModalityService) isInUse(uuid *uuid.UUID) bool {
+func (ms *ModalityService) isInUse(ctx context.Context, uuid *uuid.UUID) bool {
 	users, err := ms.UserRepository.Get(
+		ctx,
 		&models.UserFilter{
 			ModalityId: *uuid,
 		})

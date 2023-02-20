@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"context"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -19,9 +20,11 @@ func TestShouldReturnIsDuplicatedEqualTrueWhenTryingToCreateMOdalityWithNameAlre
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	ctx := context.Background()
+
 	repo := mock_repository.NewMockIModalityRepository(mockCtrl)
 	repo.EXPECT().
-		ExistsByName(&id, &name).
+		ExistsByName(ctx, &id, &name).
 		Return(true, nil).
 		Times(1)
 
@@ -36,7 +39,7 @@ func TestShouldReturnIsDuplicatedEqualTrueWhenTryingToCreateMOdalityWithNameAlre
 	}
 
 	// Act
-	code := service.CreateNewModality(&m)
+	code := service.CreateNewModality(ctx, &m)
 
 	// Assert
 	if code != shared.DuplicatedRecord {
@@ -55,13 +58,15 @@ func TestShouldReturnSuccessWhenTryingToCreateModalityWithNameNotRegistered(t *t
 		Description: "Lorem Ipsum",
 	}
 
+	ctx := context.Background()
+
 	repo := mock_repository.NewMockIModalityRepository(mockCtrl)
 	repo.EXPECT().
-		ExistsByName(&m.Id, &m.Name).
+		ExistsByName(ctx, &m.Id, &m.Name).
 		Return(false, nil).
 		Times(1)
 	repo.EXPECT().
-		CreateNewModality(&m).
+		CreateNewModality(ctx, &m).
 		Return(nil).
 		Times(1)
 
@@ -70,7 +75,7 @@ func TestShouldReturnSuccessWhenTryingToCreateModalityWithNameNotRegistered(t *t
 	}
 
 	// Act
-	code := service.CreateNewModality(&m)
+	code := service.CreateNewModality(ctx, &m)
 
 	// Assert
 	if code != shared.Success {
@@ -83,6 +88,7 @@ func TestShouldReturnDuplicatedRecordWhenTryingToEditModalityWithNameAlreadyRegi
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	ctx := context.Background()
 	var emptyUsers []*models.User
 
 	m := models.Modality{
@@ -93,13 +99,15 @@ func TestShouldReturnDuplicatedRecordWhenTryingToEditModalityWithNameAlreadyRegi
 
 	repo := mock_repository.NewMockIModalityRepository(mockCtrl)
 	repo.EXPECT().
-		ExistsByName(&m.Id, &m.Name).
+		ExistsByName(ctx, &m.Id, &m.Name).
 		Return(true, nil).
 		Times(1)
 
 	uRepo := mock_repository.NewMockIUserRepository(mockCtrl)
 	uRepo.EXPECT().
-		Get(&models.UserFilter{ModalityId: m.Id}).
+		Get(
+			ctx,
+			&models.UserFilter{ModalityId: m.Id}).
 		Return(emptyUsers, nil).
 		Times(1)
 
@@ -109,7 +117,7 @@ func TestShouldReturnDuplicatedRecordWhenTryingToEditModalityWithNameAlreadyRegi
 	}
 
 	// Act
-	code := service.EditModality(&m.Id, &m)
+	code := service.EditModality(ctx, &m.Id, &m)
 
 	// Assert
 	if code != shared.DuplicatedRecord {
@@ -123,6 +131,7 @@ func TestShouldReturnInvalidOperationWhenTryingToDeleteModalityInUseByUsers(t *t
 	defer mockCtrl.Finish()
 
 	users := []*models.User{{Id: uuid.New()}}
+	ctx := context.Background()
 
 	m := models.Modality{
 		Id:          uuid.New(),
@@ -132,7 +141,9 @@ func TestShouldReturnInvalidOperationWhenTryingToDeleteModalityInUseByUsers(t *t
 
 	uRepo := mock_repository.NewMockIUserRepository(mockCtrl)
 	uRepo.EXPECT().
-		Get(&models.UserFilter{ModalityId: m.Id}).
+		Get(
+			ctx,
+			&models.UserFilter{ModalityId: m.Id}).
 		Return(users, nil).
 		Times(1)
 
@@ -141,7 +152,7 @@ func TestShouldReturnInvalidOperationWhenTryingToDeleteModalityInUseByUsers(t *t
 	}
 
 	// Act
-	code := service.DeleteModalityById(&m.Id)
+	code := service.DeleteModalityById(ctx, &m.Id)
 
 	// Assert
 	if code != shared.InvalidOperation {
@@ -155,6 +166,7 @@ func TestShouldReturnInvalidOperationWhenTryingToEditModalityInUseByUsers(t *tes
 	defer mockCtrl.Finish()
 
 	users := []*models.User{{Id: uuid.New()}}
+	ctx := context.Background()
 
 	m := models.Modality{
 		Id:          uuid.New(),
@@ -164,7 +176,9 @@ func TestShouldReturnInvalidOperationWhenTryingToEditModalityInUseByUsers(t *tes
 
 	uRepo := mock_repository.NewMockIUserRepository(mockCtrl)
 	uRepo.EXPECT().
-		Get(&models.UserFilter{ModalityId: m.Id}).
+		Get(
+			ctx,
+			&models.UserFilter{ModalityId: m.Id}).
 		Return(users, nil).
 		Times(1)
 
@@ -173,7 +187,7 @@ func TestShouldReturnInvalidOperationWhenTryingToEditModalityInUseByUsers(t *tes
 	}
 
 	// Act
-	code := service.EditModality(&m.Id, &m)
+	code := service.EditModality(ctx, &m.Id, &m)
 
 	// Assert
 	if code != shared.InvalidOperation {

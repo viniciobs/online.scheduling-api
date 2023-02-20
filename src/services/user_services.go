@@ -14,13 +14,13 @@ import (
 )
 
 type IUserServices interface {
-	Get(*models.UserFilter) ([]*models.User, shared.Code)
-	GetUserById(uuid *uuid.UUID) (*models.User, shared.Code)
-	CreateNewUser(u *models.User) (code shared.Code, token string)
-	ActivateUser(uuid *uuid.UUID) shared.Code
-	EditUser(uuid *uuid.UUID, u *models.User) shared.Code
-	EditModalities(userId *uuid.UUID, modalitiesIds []uuid.UUID) shared.Code
-	DeleteUserById(uuid *uuid.UUID) shared.Code
+	Get(ctx context.Context, filter *models.UserFilter) ([]*models.User, shared.Code)
+	GetUserById(ctx context.Context, uuid *uuid.UUID) (*models.User, shared.Code)
+	CreateNewUser(ctx context.Context, u *models.User) (code shared.Code, token string)
+	ActivateUser(ctx context.Context, uuid *uuid.UUID) shared.Code
+	EditUser(ctx context.Context, uuid *uuid.UUID, u *models.User) shared.Code
+	EditModalities(ctx context.Context, userId *uuid.UUID, modalitiesIds []uuid.UUID) shared.Code
+	DeleteUserById(ctx context.Context, uuid *uuid.UUID) shared.Code
 }
 
 type UserServices struct {
@@ -28,8 +28,8 @@ type UserServices struct {
 	ModalityRepository repository.IModalityRepository
 }
 
-func (us *UserServices) Get(filter *models.UserFilter) ([]*models.User, shared.Code) {
-	result, err := us.UserRepository.Get(filter)
+func (us *UserServices) Get(ctx context.Context, filter *models.UserFilter) ([]*models.User, shared.Code) {
+	result, err := us.UserRepository.Get(ctx, filter)
 
 	if err != nil {
 		return result, infraService.MapErrorFrom(err)
@@ -38,8 +38,8 @@ func (us *UserServices) Get(filter *models.UserFilter) ([]*models.User, shared.C
 	return result, shared.Success
 }
 
-func (us *UserServices) GetUserById(uuid *uuid.UUID) (*models.User, shared.Code) {
-	result, err := us.UserRepository.GetUserById(uuid)
+func (us *UserServices) GetUserById(ctx context.Context, uuid *uuid.UUID) (*models.User, shared.Code) {
+	result, err := us.UserRepository.GetUserById(ctx, uuid)
 	if err != nil {
 		return nil, infraService.MapErrorFrom(err)
 	}
@@ -51,8 +51,8 @@ func (us *UserServices) GetUserById(uuid *uuid.UUID) (*models.User, shared.Code)
 	return result, shared.Success
 }
 
-func (us *UserServices) CreateNewUser(u *models.User) (code shared.Code, token string) {
-	exists, err := us.UserRepository.ExistsBy(&u.Id, &u.Phone, &u.Login)
+func (us *UserServices) CreateNewUser(ctx context.Context, u *models.User) (code shared.Code, token string) {
+	exists, err := us.UserRepository.ExistsBy(ctx, &u.Id, &u.Phone, &u.Login)
 	if err != nil {
 		return infraService.MapErrorFrom(err), token
 	}
@@ -62,7 +62,7 @@ func (us *UserServices) CreateNewUser(u *models.User) (code shared.Code, token s
 
 	u.Passphrase = helpers.Crypt(u.Passphrase)
 
-	if err = us.UserRepository.CreateNewUser(u); err != nil {
+	if err = us.UserRepository.CreateNewUser(ctx, u); err != nil {
 		return infraService.MapErrorFrom(err), token
 	}
 
@@ -74,8 +74,8 @@ func (us *UserServices) CreateNewUser(u *models.User) (code shared.Code, token s
 	return shared.Success, token
 }
 
-func (us *UserServices) ActivateUser(uuid *uuid.UUID) shared.Code {
-	err := us.UserRepository.ActivateUser(uuid)
+func (us *UserServices) ActivateUser(ctx context.Context, uuid *uuid.UUID) shared.Code {
+	err := us.UserRepository.ActivateUser(ctx, uuid)
 
 	if err != nil {
 		return infraService.MapErrorFrom(err)
@@ -84,8 +84,8 @@ func (us *UserServices) ActivateUser(uuid *uuid.UUID) shared.Code {
 	return shared.Success
 }
 
-func (us *UserServices) EditUser(uuid *uuid.UUID, u *models.User) shared.Code {
-	exists, err := us.UserRepository.ExistsBy(uuid, &u.Phone, &u.Login)
+func (us *UserServices) EditUser(ctx context.Context, uuid *uuid.UUID, u *models.User) shared.Code {
+	exists, err := us.UserRepository.ExistsBy(ctx, uuid, &u.Phone, &u.Login)
 	if exists {
 		return shared.DuplicatedRecord
 	}
@@ -94,7 +94,7 @@ func (us *UserServices) EditUser(uuid *uuid.UUID, u *models.User) shared.Code {
 		return infraService.MapErrorFrom(err)
 	}
 
-	err = us.UserRepository.EditUser(uuid, u)
+	err = us.UserRepository.EditUser(ctx, uuid, u)
 	if err != nil {
 		return infraService.MapErrorFrom(err)
 	}
@@ -102,8 +102,8 @@ func (us *UserServices) EditUser(uuid *uuid.UUID, u *models.User) shared.Code {
 	return shared.Success
 }
 
-func (us *UserServices) EditModalities(userId *uuid.UUID, modalitiesIds []uuid.UUID) shared.Code {
-	user, err := us.UserRepository.GetUserById(userId)
+func (us *UserServices) EditModalities(ctx context.Context, userId *uuid.UUID, modalitiesIds []uuid.UUID) shared.Code {
+	user, err := us.UserRepository.GetUserById(ctx, userId)
 	if err != nil {
 		return shared.NonExistentRecord
 	}
@@ -112,7 +112,13 @@ func (us *UserServices) EditModalities(userId *uuid.UUID, modalitiesIds []uuid.U
 		return shared.InvalidOperation
 	}
 
-	modalities, err := us.ModalityRepository.GetModalities(&models.ModalityFilter{Ids: modalitiesIds})
+	modalities, err := us.ModalityRepository.GetModalities(
+		ctx,
+		&models.ModalityFilter{
+			Ids: modalitiesIds,
+		},
+	)
+
 	if err != nil {
 		return infraService.MapErrorFrom(err)
 	}
@@ -121,7 +127,7 @@ func (us *UserServices) EditModalities(userId *uuid.UUID, modalitiesIds []uuid.U
 
 	user.Modalities = modalities
 
-	err = us.UserRepository.EditUserModalities(userId, user)
+	err = us.UserRepository.EditUserModalities(ctx, userId, user)
 	if err != nil {
 		return infraService.MapErrorFrom(err)
 	}
@@ -129,8 +135,8 @@ func (us *UserServices) EditModalities(userId *uuid.UUID, modalitiesIds []uuid.U
 	return shared.Success
 }
 
-func (us *UserServices) DeleteUserById(uuid *uuid.UUID) shared.Code {
-	isFound, err := us.UserRepository.DeleteUserById(uuid)
+func (us *UserServices) DeleteUserById(ctx context.Context, uuid *uuid.UUID) shared.Code {
+	isFound, err := us.UserRepository.DeleteUserById(ctx, uuid)
 
 	if err != nil {
 		return infraService.MapErrorFrom(err)

@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"context"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -21,9 +22,11 @@ func TestShouldReturnIsDuplicatedEqualTrueWhenTryingToCreateUserWithPhoneAlready
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	ctx := context.Background()
+
 	repo := mock_repository.NewMockIUserRepository(mockCtrl)
 	repo.EXPECT().
-		ExistsBy(&id, &phone, &login).
+		ExistsBy(ctx, &id, &phone, &login).
 		Return(true, nil).
 		Times(1)
 
@@ -41,7 +44,7 @@ func TestShouldReturnIsDuplicatedEqualTrueWhenTryingToCreateUserWithPhoneAlready
 	}
 
 	// Act
-	code, _ := service.CreateNewUser(&u)
+	code, _ := service.CreateNewUser(ctx, &u)
 
 	// Assert
 	if code != shared.DuplicatedRecord {
@@ -54,6 +57,8 @@ func TestShouldReturnSuccessWhenTryingToCreateUserWithPhoneNotRegistered(t *test
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	ctx := context.Background()
+
 	u := models.User{
 		Id:       uuid.New(),
 		Name:     "Test",
@@ -65,11 +70,11 @@ func TestShouldReturnSuccessWhenTryingToCreateUserWithPhoneNotRegistered(t *test
 
 	repo := mock_repository.NewMockIUserRepository(mockCtrl)
 	repo.EXPECT().
-		ExistsBy(&u.Id, &u.Phone, &u.Login).
+		ExistsBy(ctx, &u.Id, &u.Phone, &u.Login).
 		Return(false, nil).
 		Times(1)
 	repo.EXPECT().
-		CreateNewUser(&u).
+		CreateNewUser(ctx, &u).
 		Return(nil).
 		Times(1)
 
@@ -78,7 +83,7 @@ func TestShouldReturnSuccessWhenTryingToCreateUserWithPhoneNotRegistered(t *test
 	}
 
 	// Act
-	code, _ := service.CreateNewUser(&u)
+	code, _ := service.CreateNewUser(ctx, &u)
 
 	// Assert
 	if code != shared.Success {
@@ -90,7 +95,7 @@ func TestShouldReturnDuplicatedRecordWhenTryingToEditUserWithPhoneAlreadyRegiste
 	// Arrange
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-
+	ctx := context.Background()
 	u := models.User{
 		Id:       uuid.New(),
 		Name:     "Test",
@@ -102,7 +107,7 @@ func TestShouldReturnDuplicatedRecordWhenTryingToEditUserWithPhoneAlreadyRegiste
 
 	repo := mock_repository.NewMockIUserRepository(mockCtrl)
 	repo.EXPECT().
-		ExistsBy(&u.Id, &u.Phone, &u.Login).
+		ExistsBy(ctx, &u.Id, &u.Phone, &u.Login).
 		Return(true, nil).
 		Times(1)
 
@@ -111,7 +116,7 @@ func TestShouldReturnDuplicatedRecordWhenTryingToEditUserWithPhoneAlreadyRegiste
 	}
 
 	// Act
-	code, _ := service.CreateNewUser(&u)
+	code, _ := service.CreateNewUser(ctx, &u)
 
 	// Assert
 	if code != shared.DuplicatedRecord {
@@ -124,6 +129,8 @@ func TestShouldReturnThirdPartyFailWhenDatabaseIsNotConnected(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	ctx := context.Background()
+
 	u := models.User{
 		Id:       uuid.New(),
 		Name:     "Test",
@@ -135,7 +142,7 @@ func TestShouldReturnThirdPartyFailWhenDatabaseIsNotConnected(t *testing.T) {
 
 	repo := mock_repository.NewMockIUserRepository(mockCtrl)
 	repo.EXPECT().
-		ExistsBy(&u.Id, &u.Phone, &u.Login).
+		ExistsBy(ctx, &u.Id, &u.Phone, &u.Login).
 		Return(false, mongo.ErrClientDisconnected).
 		Times(1)
 
@@ -144,7 +151,7 @@ func TestShouldReturnThirdPartyFailWhenDatabaseIsNotConnected(t *testing.T) {
 	}
 
 	// Act
-	code, _ := service.CreateNewUser(&u)
+	code, _ := service.CreateNewUser(ctx, &u)
 
 	// Assert
 	if code != shared.ThirdPartyFail {
@@ -166,9 +173,11 @@ func TestShouldNotEditUserModalitiesWhenUserIsNotActive(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	ctx := context.Background()
+
 	userRepo := mock_repository.NewMockIUserRepository(mockCtrl)
 	userRepo.EXPECT().
-		GetUserById(&id).
+		GetUserById(ctx, &id).
 		Return(&u, nil).
 		Times(1)
 
@@ -177,7 +186,7 @@ func TestShouldNotEditUserModalitiesWhenUserIsNotActive(t *testing.T) {
 	}
 
 	// Act
-	code := service.EditModalities(&id, []uuid.UUID{uuid.New()})
+	code := service.EditModalities(ctx, &id, []uuid.UUID{uuid.New()})
 
 	// Assert
 	if code != shared.InvalidOperation {

@@ -5,6 +5,7 @@
 package mock_repository
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -36,89 +37,89 @@ func (m *MockIModalityRepository) EXPECT() *MockIModalityRepositoryMockRecorder 
 }
 
 // CreateNewModality mocks base method.
-func (m_2 *MockIModalityRepository) CreateNewModality(m *models.Modality) error {
+func (m_2 *MockIModalityRepository) CreateNewModality(ctx context.Context, m *models.Modality) error {
 	m_2.ctrl.T.Helper()
-	ret := m_2.ctrl.Call(m_2, "CreateNewModality", m)
+	ret := m_2.ctrl.Call(m_2, "CreateNewModality", ctx, m)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CreateNewModality indicates an expected call of CreateNewModality.
-func (mr *MockIModalityRepositoryMockRecorder) CreateNewModality(m interface{}) *gomock.Call {
+func (mr *MockIModalityRepositoryMockRecorder) CreateNewModality(ctx, m interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNewModality", reflect.TypeOf((*MockIModalityRepository)(nil).CreateNewModality), m)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNewModality", reflect.TypeOf((*MockIModalityRepository)(nil).CreateNewModality), ctx, m)
 }
 
 // DeleteModalityById mocks base method.
-func (m *MockIModalityRepository) DeleteModalityById(uuid *uuid.UUID) (bool, error) {
+func (m *MockIModalityRepository) DeleteModalityById(ctx context.Context, uuid *uuid.UUID) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteModalityById", uuid)
+	ret := m.ctrl.Call(m, "DeleteModalityById", ctx, uuid)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // DeleteModalityById indicates an expected call of DeleteModalityById.
-func (mr *MockIModalityRepositoryMockRecorder) DeleteModalityById(uuid interface{}) *gomock.Call {
+func (mr *MockIModalityRepositoryMockRecorder) DeleteModalityById(ctx, uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteModalityById", reflect.TypeOf((*MockIModalityRepository)(nil).DeleteModalityById), uuid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteModalityById", reflect.TypeOf((*MockIModalityRepository)(nil).DeleteModalityById), ctx, uuid)
 }
 
 // EditModality mocks base method.
-func (m_2 *MockIModalityRepository) EditModality(uuid *uuid.UUID, m *models.Modality) error {
+func (m_2 *MockIModalityRepository) EditModality(ctx context.Context, uuid *uuid.UUID, m *models.Modality) error {
 	m_2.ctrl.T.Helper()
-	ret := m_2.ctrl.Call(m_2, "EditModality", uuid, m)
+	ret := m_2.ctrl.Call(m_2, "EditModality", ctx, uuid, m)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // EditModality indicates an expected call of EditModality.
-func (mr *MockIModalityRepositoryMockRecorder) EditModality(uuid, m interface{}) *gomock.Call {
+func (mr *MockIModalityRepositoryMockRecorder) EditModality(ctx, uuid, m interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EditModality", reflect.TypeOf((*MockIModalityRepository)(nil).EditModality), uuid, m)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EditModality", reflect.TypeOf((*MockIModalityRepository)(nil).EditModality), ctx, uuid, m)
 }
 
 // ExistsByName mocks base method.
-func (m *MockIModalityRepository) ExistsByName(uuid *uuid.UUID, name *string) (bool, error) {
+func (m *MockIModalityRepository) ExistsByName(ctx context.Context, uuid *uuid.UUID, name *string) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExistsByName", uuid, name)
+	ret := m.ctrl.Call(m, "ExistsByName", ctx, uuid, name)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ExistsByName indicates an expected call of ExistsByName.
-func (mr *MockIModalityRepositoryMockRecorder) ExistsByName(uuid, name interface{}) *gomock.Call {
+func (mr *MockIModalityRepositoryMockRecorder) ExistsByName(ctx, uuid, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsByName", reflect.TypeOf((*MockIModalityRepository)(nil).ExistsByName), uuid, name)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsByName", reflect.TypeOf((*MockIModalityRepository)(nil).ExistsByName), ctx, uuid, name)
 }
 
 // GetModalities mocks base method.
-func (m *MockIModalityRepository) GetModalities(filter *models.ModalityFilter) ([]models.Modality, error) {
+func (m *MockIModalityRepository) GetModalities(ctx context.Context, filter *models.ModalityFilter) ([]models.Modality, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetModalities", filter)
+	ret := m.ctrl.Call(m, "GetModalities", ctx, filter)
 	ret0, _ := ret[0].([]models.Modality)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetModalities indicates an expected call of GetModalities.
-func (mr *MockIModalityRepositoryMockRecorder) GetModalities(filter interface{}) *gomock.Call {
+func (mr *MockIModalityRepositoryMockRecorder) GetModalities(ctx, filter interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetModalities", reflect.TypeOf((*MockIModalityRepository)(nil).GetModalities), filter)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetModalities", reflect.TypeOf((*MockIModalityRepository)(nil).GetModalities), ctx, filter)
 }
 
 // GetModalityById mocks base method.
-func (m *MockIModalityRepository) GetModalityById(uuid *uuid.UUID) (*models.Modality, error) {
+func (m *MockIModalityRepository) GetModalityById(ctx context.Context, uuid *uuid.UUID) (*models.Modality, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetModalityById", uuid)
+	ret := m.ctrl.Call(m, "GetModalityById", ctx, uuid)
 	ret0, _ := ret[0].(*models.Modality)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetModalityById indicates an expected call of GetModalityById.
-func (mr *MockIModalityRepositoryMockRecorder) GetModalityById(uuid interface{}) *gomock.Call {
+func (mr *MockIModalityRepositoryMockRecorder) GetModalityById(ctx, uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetModalityById", reflect.TypeOf((*MockIModalityRepository)(nil).GetModalityById), uuid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetModalityById", reflect.TypeOf((*MockIModalityRepository)(nil).GetModalityById), ctx, uuid)
 }

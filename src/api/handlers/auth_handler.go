@@ -22,7 +22,10 @@ func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ok, user := h.UserRepository.Authenticate(requestData.Login, requestData.Passphrase)
+	ok, user := h.UserRepository.Authenticate(
+		r.Context(),
+		requestData.Login,
+		helpers.Crypt(requestData.Passphrase))
 
 	if !ok {
 		helpers.JSONResponseError(w, http.StatusUnauthorized, nil)

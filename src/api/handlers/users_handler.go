@@ -44,7 +44,7 @@ func (uc *UsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 		filter.ModalityName = modality
 	}
 
-	users, responseCode := uc.UserService.Get(&filter)
+	users, responseCode := uc.UserService.Get(r.Context(), &filter)
 
 	if responseCode != shared.Success {
 		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)
@@ -67,7 +67,7 @@ func (uc *UsersHandler) GetById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, responseCode := uc.UserService.GetUserById(&id)
+	user, responseCode := uc.UserService.GetUserById(r.Context(), &id)
 
 	if responseCode == shared.NonExistentRecord {
 		helpers.JSONResponseError(w, http.StatusNotFound, nil)
@@ -109,7 +109,7 @@ func (uc *UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 		requestData.Role,
 		false)
 
-	responseCode, token := uc.UserService.CreateNewUser(&u)
+	responseCode, token := uc.UserService.CreateNewUser(r.Context(), &u)
 
 	if responseCode != shared.Success {
 		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)
@@ -129,7 +129,7 @@ func (uc *UsersHandler) Activate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseCode := uc.UserService.ActivateUser(&id)
+	responseCode := uc.UserService.ActivateUser(r.Context(), &id)
 
 	if responseCode == shared.NonExistentRecord {
 		helpers.JSONResponseError(w, http.StatusNotFound, nil)
@@ -168,7 +168,7 @@ func (uc *UsersHandler) Edit(w http.ResponseWriter, r *http.Request) {
 		requestData.Role,
 		false)
 
-	responseCode := uc.UserService.EditUser(&id, &u)
+	responseCode := uc.UserService.EditUser(r.Context(), &id, &u)
 
 	if responseCode == shared.NonExistentRecord {
 		helpers.JSONResponseError(w, http.StatusNotFound, nil)
@@ -196,7 +196,7 @@ func (h *UsersHandler) EditModalities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseCode := h.UserService.EditModalities(&userId, requestData.Modalities)
+	responseCode := h.UserService.EditModalities(r.Context(), &userId, requestData.Modalities)
 
 	if responseCode != shared.Success {
 		helpers.JSONResponseError(w, helpers.GetErrorStatusCodeFrom(responseCode), nil)
@@ -213,7 +213,7 @@ func (uc *UsersHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseCode := uc.UserService.DeleteUserById(&id)
+	responseCode := uc.UserService.DeleteUserById(r.Context(), &id)
 
 	if responseCode == shared.NonExistentRecord {
 		helpers.JSONResponseError(w, http.StatusNotFound, nil)

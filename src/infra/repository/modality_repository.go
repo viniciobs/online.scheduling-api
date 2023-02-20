@@ -12,19 +12,19 @@ import (
 )
 
 type IModalityRepository interface {
-	GetModalities(filter *models.ModalityFilter) ([]models.Modality, error)
-	GetModalityById(uuid *uuid.UUID) (*models.Modality, error)
-	CreateNewModality(m *models.Modality) error
-	EditModality(uuid *uuid.UUID, m *models.Modality) error
-	DeleteModalityById(uuid *uuid.UUID) (isFound bool, err error)
-	ExistsByName(uuid *uuid.UUID, name *string) (bool, error)
+	GetModalities(ctx context.Context, filter *models.ModalityFilter) ([]models.Modality, error)
+	GetModalityById(ctx context.Context, uuid *uuid.UUID) (*models.Modality, error)
+	CreateNewModality(ctx context.Context, m *models.Modality) error
+	EditModality(ctx context.Context, uuid *uuid.UUID, m *models.Modality) error
+	DeleteModalityById(ctx context.Context, uuid *uuid.UUID) (isFound bool, err error)
+	ExistsByName(ctx context.Context, uuid *uuid.UUID, name *string) (bool, error)
 }
 
 type ModalityRepository struct {
 	DB *data.DB
 }
 
-func (mr *ModalityRepository) GetModalities(filter *models.ModalityFilter) ([]models.Modality, error) {
+func (mr *ModalityRepository) GetModalities(ctx context.Context, filter *models.ModalityFilter) ([]models.Modality, error) {
 	query := bson.M{}
 
 	if len(filter.Ids) > 0 {
@@ -35,14 +35,14 @@ func (mr *ModalityRepository) GetModalities(filter *models.ModalityFilter) ([]mo
 		query["name"] = bson.M{"$regex": filter.Name, "$options": "i"}
 	}
 
-	cursor, err := mr.collection().Find(context.TODO(), query)
+	cursor, err := mr.collection().Find(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
 	modalities := []models.Modality{}
 
-	for cursor.Next(context.TODO()) {
+	for cursor.Next(ctx) {
 		var modality models.Modality
 		cursor.Decode(&modality)
 
@@ -52,12 +52,12 @@ func (mr *ModalityRepository) GetModalities(filter *models.ModalityFilter) ([]mo
 	return modalities, nil
 }
 
-func (mr *ModalityRepository) GetModalityById(uuid *uuid.UUID) (*models.Modality, error) {
+func (mr *ModalityRepository) GetModalityById(ctx context.Context, uuid *uuid.UUID) (*models.Modality, error) {
 	var modality *models.Modality
 
 	err := mr.collection().
 		FindOne(
-			context.TODO(),
+			ctx,
 			&bson.M{"id": uuid}).
 		Decode(&modality)
 
@@ -68,13 +68,13 @@ func (mr *ModalityRepository) GetModalityById(uuid *uuid.UUID) (*models.Modality
 	return modality, err
 }
 
-func (mr *ModalityRepository) CreateNewModality(m *models.Modality) error {
-	_, err := mr.collection().InsertOne(context.TODO(), m)
+func (mr *ModalityRepository) CreateNewModality(ctx context.Context, m *models.Modality) error {
+	_, err := mr.collection().InsertOne(ctx, m)
 
 	return err
 }
 
-func (mr *ModalityRepository) EditModality(uuid *uuid.UUID, m *models.Modality) error {
+func (mr *ModalityRepository) EditModality(ctx context.Context, uuid *uuid.UUID, m *models.Modality) error {
 	filter := bson.M{"id": uuid}
 	update := bson.M{
 		"$set": bson.M{
@@ -83,7 +83,7 @@ func (mr *ModalityRepository) EditModality(uuid *uuid.UUID, m *models.Modality) 
 		},
 	}
 
-	res, err := mr.collection().UpdateOne(context.TODO(), filter, update)
+	res, err := mr.collection().UpdateOne(ctx, filter, update)
 
 	if res.MatchedCount == 0 {
 		return mongo.ErrNoDocuments
@@ -92,10 +92,10 @@ func (mr *ModalityRepository) EditModality(uuid *uuid.UUID, m *models.Modality) 
 	return err
 }
 
-func (mr *ModalityRepository) DeleteModalityById(uuid *uuid.UUID) (isFound bool, err error) {
+func (mr *ModalityRepository) DeleteModalityById(ctx context.Context, uuid *uuid.UUID) (isFound bool, err error) {
 	res, err := mr.collection().
 		DeleteOne(
-			context.TODO(),
+			ctx,
 			&bson.M{"id": uuid})
 
 	if err != nil {
@@ -109,10 +109,10 @@ func (mr *ModalityRepository) DeleteModalityById(uuid *uuid.UUID) (isFound bool,
 	return true, nil
 }
 
-func (mr *ModalityRepository) ExistsByName(uuid *uuid.UUID, name *string) (bool, error) {
+func (mr *ModalityRepository) ExistsByName(ctx context.Context, uuid *uuid.UUID, name *string) (bool, error) {
 	err := mr.collection().
 		FindOne(
-			context.TODO(),
+			ctx,
 			&bson.M{
 				"id":   &bson.M{"$ne": uuid},
 				"name": name,
