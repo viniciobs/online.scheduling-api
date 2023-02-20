@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"sync"
 
 	"github.com/google/uuid"
 	"github.com/online.scheduling-api/src/infra/repository"
@@ -44,23 +45,31 @@ func (s *ScheduleService) Create(ctx context.Context, userId, modalityId *uuid.U
 		return shared.DuplicatedRecord
 	}
 
-	modality, err := s.ModalityRepository.GetModalityById(ctx, modalityId)
+	var (
+		wg       sync.WaitGroup
+		modality *models.Modality
+		user     *models.User
+	)
+
+	wg.Add(2)
+
+	go func() {
+		modality, err = s.ModalityRepository.GetModalityById(ctx, modalityId)
+		wg.Done()
+	}()
+
+	go func() {
+		user, err = s.UserRespository.GetUserById(ctx, userId)
+		wg.Done()
+	}()
+
+	wg.Wait()
 
 	if err != nil {
 		return infraService.MapErrorFrom(err)
 	}
 
-	if modality == nil {
-		return shared.NonExistentRecord
-	}
-
-	user, err := s.UserRespository.GetUserById(ctx, userId)
-
-	if err != nil {
-		return infraService.MapErrorFrom(err)
-	}
-
-	if user == nil {
+	if modality == nil || user == nil {
 		return shared.NonExistentRecord
 	}
 

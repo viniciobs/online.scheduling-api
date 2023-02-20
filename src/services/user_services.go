@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"sync"
 
 	"github.com/google/uuid"
 	"github.com/online.scheduling-api/constants"
@@ -103,24 +104,51 @@ func (us *UserServices) EditUser(ctx context.Context, uuid *uuid.UUID, u *models
 }
 
 func (us *UserServices) EditModalities(ctx context.Context, userId *uuid.UUID, modalitiesIds []uuid.UUID) shared.Code {
-	user, err := us.UserRepository.GetUserById(ctx, userId)
-	if err != nil {
-		return shared.NonExistentRecord
-	}
-
-	if !user.IsActive {
-		return shared.InvalidOperation
-	}
-
-	modalities, err := us.ModalityRepository.GetModalities(
-		ctx,
-		&models.ModalityFilter{
-			Ids: modalitiesIds,
-		},
+	var (
+		wg         sync.WaitGroup
+		user       *models.User
+		modalities []models.Modality
+		err        error
+		wgResult   shared.Code
 	)
 
-	if err != nil {
-		return infraService.MapErrorFrom(err)
+	wg.Add(2)
+
+	wgResult = shared.Success
+
+	go func() {
+		user, err = us.UserRepository.GetUserById(ctx, userId)
+		if err != nil {
+			wgResult = shared.NonExistentRecord
+			wg.Done()
+		}
+
+		if !user.IsActive {
+			wgResult = shared.InvalidOperation
+		}
+
+		wg.Done()
+	}()
+
+	go func() {
+		modalities, err = us.ModalityRepository.GetModalities(
+			ctx,
+			&models.ModalityFilter{
+				Ids: modalitiesIds,
+			},
+		)
+
+		if err != nil {
+			wgResult = infraService.MapErrorFrom(err)
+		}
+
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	if wgResult != shared.Success {
+		return wgResult
 	}
 
 	// TODO: the above code could be executed at same time
