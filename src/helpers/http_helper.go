@@ -3,6 +3,7 @@ package helpers
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 
@@ -38,6 +39,10 @@ func ReadJSONBody(r *http.Request, data interface{}) error {
 }
 
 func ReadBody(r *http.Request) ([]byte, error) {
+	if r.Body == nil {
+		return nil, errors.New("Nil body")
+	}
+
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, err

@@ -25,12 +25,13 @@ func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 	ok, user := h.UserRepository.Authenticate(requestData.Login, requestData.Passphrase)
 
 	if !ok {
-		helpers.JSONResponseError(w, http.StatusNotFound, nil)
+		helpers.JSONResponseError(w, http.StatusUnauthorized, nil)
 		return
 	}
 
 	claims := models.MapUserClaimsFrom(user)
 	token, err := helpers.CreateTokenFor(claims)
+
 	if err != nil {
 		helpers.JSONResponseError(w, http.StatusUnprocessableEntity, err)
 		return

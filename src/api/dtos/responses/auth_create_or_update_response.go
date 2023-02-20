@@ -6,12 +6,13 @@ import (
 )
 
 type AuthCreateOrUpdateResponse struct {
-	UserId          uuid.UUID   `json:"user-id"`
-	Name            string      `json:"user-name"`
-	RoleCode        models.Role `json:"role-code"`
-	RoleDescription string      `json:"role-description"`
-	IsActive        bool        `json:"isActive"`
-	Token           string      `json:"auth-token"`
+	UserId          uuid.UUID         `json:"user-id"`
+	Name            string            `json:"user-name"`
+	RoleCode        models.Role       `json:"role-code"`
+	RoleDescription string            `json:"role-description"`
+	IsActive        bool              `json:"isActive"`
+	Token           string            `json:"auth-token"`
+	Modalities      []models.Modality `json:"modalities"`
 }
 
 func MapAuthResponseFrom(u *models.User, token string) AuthCreateOrUpdateResponse {
@@ -22,5 +23,6 @@ func MapAuthResponseFrom(u *models.User, token string) AuthCreateOrUpdateRespons
 		RoleCode:        u.Role,
 		RoleDescription: u.Role.GetDescription(),
 		Token:           token,
+		Modalities:      u.Modalities,
 	}
 }

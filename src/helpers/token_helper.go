@@ -25,7 +25,7 @@ func CreateTokenFor(_claims map[string]any) (string, error) {
 
 func RetrieveToken(r *http.Request) (*jwt.Token, error) {
 	if r.Header[constants.HEADER_AUTH] == nil {
-		return nil, errors.New("authorization header not present")
+		return nil, errors.New("authorization header is not present")
 	}
 
 	return jwt.Parse(
